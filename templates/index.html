@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PhishEye — Your Personal Scam Guardian</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800;900&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --coral: #FF6B4A;
@@ -62,7 +62,7 @@
         .logo-svg { width: 100px; height: 100px; flex-shrink: 0; }
 
         .brand {
-            font-family: 'Nunito', sans-serif;
+            font-family: 'Sora', sans-serif;
             font-weight: 900;
             font-size: 38px;
             color: var(--ink);
@@ -755,6 +755,17 @@
             z-index: 1;
         }
         body { background: #e8f4fd; }
+            .header-tips {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            font-style: italic;
+            color: var(--muted);
+            font-weight: 500;
+            white-space: nowrap;
+            transition: opacity 0.5s ease;
+        }
     </style>
 </head>
 <body>
@@ -768,6 +779,9 @@
             <div class="brand">Phish <span>Eye</span></div>
             <div class="brand-sub">AI Scam Guardian</div>
         </div>
+    </div>
+    <div class="header-tips" id="headerTip">
+        <span id="tipText">💡 Tip: The IRS will never call you and demand gift card payments</span>
     </div>
     <div class="header-right">
         <span class="gemini-badge">✦ Gemini AI</span>
@@ -891,9 +905,9 @@
                     <div class="call-feature-desc">Catches "act now", "don't hang up", and pressure tactics instantly</div>
                 </div>
                 <div class="call-feature-card">
-                    <div class="call-feature-icon">👴</div>
-                    <div class="call-feature-title">Grandparent Scam</div>
-                    <div class="call-feature-desc">Detects family emergency + money request patterns used on elderly</div>
+                    <div class="call-feature-icon">👨‍👩‍👧</div>
+                    <div class="call-feature-title">AI Voice Cloning</div>
+                    <div class="call-feature-desc">Detects when scammers clone a family member or friend's voice to fake emergencies</div>
                 </div>
                 <div class="call-feature-card">
                     <div class="call-feature-icon">🏦</div>
@@ -1696,6 +1710,37 @@ function addCallAlert(type, emoji, text) {
       requestAnimationFrame(draw);
     }
     draw();
+
+    const TIPS = [
+        "💡 The IRS will never call you demanding gift card payments!",
+        "💡 Banks never ask for your full password over the phone!",
+        "💡 If it creates urgency — slow down, it's probably a scam!",
+        "💡 Verify suspicious emails by calling the company directly",
+        "💡 Legitimate companies never ask you to pay via gift cards",
+        "💡 'You've won a prize' emails are almost always scams",
+        "💡 Never click links in texts from unknown numbers",
+        "💡 AI can now clone a family member's voice from just 3 seconds of audio!",
+        "💡 Government agencies contact you by mail, not phone calls",
+        "💡 If someone asks you to keep it secret — it's a scam!",
+        "💡 Check email sender addresses carefully — scammers use lookalikes!",
+        "💡 Never give remote access to your computer to unsolicited callers",
+        "💡 Romance scams cost Americans over $1 billion every year",
+        "💡 Phishing links often mimic real URLs with tiny spelling changes",
+        "💡 When in doubt, use Phish Eye to check it instantly"
+    ];
+    let tipIndex = 0;
+    const tipEl = document.getElementById('tipText');
+    setInterval(() => {
+        const tip = document.getElementById('headerTip');
+        tip.style.opacity = '0';
+        setTimeout(() => {
+            tipIndex = (tipIndex + 1) % TIPS.length;
+            tipEl.textContent = TIPS[tipIndex];
+            tip.style.opacity = '1';
+        }, 500);
+    }, 5000);
+
+
     </script>
 </body>
 </html>

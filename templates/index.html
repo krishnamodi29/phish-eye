@@ -33,6 +33,7 @@
             --shadow: 0 4px 24px rgba(26,26,46,0.08);
             --shadow-lg: 0 12px 48px rgba(26,26,46,0.12);
         }
+        body { background: #fdfaf2; }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -741,9 +742,23 @@
             .verdict-header { padding: 24px 16px 18px; }
             header { padding: 12px 16px; }
         }
+
+            #bgCanvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        header, .container, footer {
+            position: relative;
+            z-index: 1;
+        }
+        body { background: #e8f4fd; }
     </style>
 </head>
 <body>
+<canvas id="bgCanvas"></canvas>
 
 <header>
     <div class="logo-wrap">
@@ -1610,5 +1625,77 @@ function addCallAlert(type, emoji, text) {
     feed.scrollTop = feed.scrollHeight;
 }
 </script>
+<script>
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+    resize();
+    window.addEventListener('resize', resize);
+    const GRID=28;
+    const continents=[
+      {x:0.06,y:0.12,w:0.18,h:0.28},{x:0.17,y:0.42,w:0.10,h:0.26},
+      {x:0.43,y:0.10,w:0.08,h:0.14},{x:0.44,y:0.25,w:0.10,h:0.28},
+      {x:0.52,y:0.08,w:0.26,h:0.30},{x:0.72,y:0.50,w:0.12,h:0.14},
+      {x:0.20,y:0.05,w:0.07,h:0.09}
+    ];
+    function inContinent(gx,gy){
+      const fx=gx/canvas.width, fy=gy/canvas.height;
+      return continents.some(c=>fx>=c.x&&fx<=c.x+c.w&&fy>=c.y&&fy<=c.y+c.h);
+    }
+    class Fish{
+      constructor(){ this.reset(true); }
+      reset(init){
+        this.y=init?Math.random()*canvas.height:(Math.random()*canvas.height*0.8+canvas.height*0.1);
+        this.x=init?Math.random()*canvas.width:-60;
+        this.speed=0.4+Math.random()*0.8;
+        this.size=10+Math.random()*14;
+        this.alpha=0.45+Math.random()*0.3;
+        this.color=Math.random()>0.5?'rgba(255,107,74,':'rgba(74,150,255,';
+        this.wobble=Math.random()*Math.PI*2;
+        this.tailPhase=Math.random()*Math.PI*2;
+      }
+      update(){ this.x+=this.speed; this.wobble+=0.025; this.tailPhase+=0.08; if(this.x>canvas.width+80) this.reset(false); }
+      draw(){
+        const s=this.size, cy=this.y+Math.sin(this.wobble)*3, cx=this.x;
+        const tw=Math.sin(this.tailPhase)*s*0.5;
+        ctx.save(); ctx.globalAlpha=this.alpha;
+        ctx.strokeStyle=this.color+'0.8)'; ctx.fillStyle=this.color+'0.12)'; ctx.lineWidth=1.2;
+        ctx.beginPath(); ctx.ellipse(cx,cy,s,s*0.45,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx-s,cy); ctx.lineTo(cx-s*1.6,cy-s*0.5+tw);
+        ctx.lineTo(cx-s*1.3,cy); ctx.lineTo(cx-s*1.6,cy+s*0.5+tw); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx+s*0.4,cy,s*0.15,0,Math.PI*2);
+        ctx.fillStyle=this.color+'0.9)'; ctx.fill(); ctx.restore();
+      }
+    }
+    const fish=Array.from({length:18},()=>new Fish());
+    let tick=0;
+    function draw(){
+      const w=canvas.width, h=canvas.height;
+      ctx.clearRect(0,0,w,h);
+      ctx.fillStyle='#fdfaf2'; ctx.fillRect(0,0,w,h);
+      ctx.lineWidth=0.4;
+      for(let x=0;x<w;x+=GRID){ ctx.beginPath(); ctx.strokeStyle='rgba(74,150,255,0.12)'; ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+      for(let y=0;y<h;y+=GRID){ ctx.beginPath(); ctx.strokeStyle='rgba(74,150,255,0.12)'; ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+      for(let x=0;x<w;x+=GRID){
+        for(let y=0;y<h;y+=GRID){
+          const dist=Math.sqrt((x-w*0.5)**2+(y-h*0.5)**2);
+          const pulse=Math.sin(tick*0.015-dist*0.018)*0.5+0.5;
+          ctx.beginPath();
+          if(inContinent(x,y)){
+            ctx.arc(x,y,2+pulse*1.2,0,Math.PI*2);
+            ctx.fillStyle=`rgba(100,160,210,${0.2+pulse*0.15})`;
+          } else {
+            ctx.arc(x,y,1,0,Math.PI*2);
+            ctx.fillStyle='rgba(74,150,255,0.15)';
+          }
+          ctx.fill();
+        }
+      }
+      fish.forEach(f=>{ f.update(); f.draw(); });
+      tick++;
+      requestAnimationFrame(draw);
+    }
+    draw();
+    </script>
 </body>
 </html>

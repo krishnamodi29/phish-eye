@@ -5,9 +5,6 @@ from flask import Flask, request, jsonify, render_template
 from scanner import analyze_image
 from dotenv import load_dotenv
 from google import genai
-from google.adk.runners import Runner
-from google.adk.sessions import InMemorySessionService
-from google.genai import types as genai_types
 
 load_dotenv()
 
@@ -16,19 +13,31 @@ client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-# ── ADK Setup ──────────────────────────────────────────────────────────────────
-from phisheye_agent.agent import root_agent
-
-session_service = InMemorySessionService()
-adk_runner = Runner(
-    agent=root_agent,
-    app_name="phisheye",
-    session_service=session_service
-)
+# ── ADK — loaded lazily on first /agent call ───────────────────────────────────
+_adk_runner = None
+_session_service = None
 APP_NAME = "phisheye"
 
-# ── ADK Helper ─────────────────────────────────────────────────────────────────
+def get_adk():
+    """Initialize ADK runner on first use — avoids startup crash if import fails."""
+    global _adk_runner, _session_service
+    if _adk_runner is None:
+        from google.adk.runners import Runner
+        from google.adk.sessions import InMemorySessionService
+        from phisheye_agent.agent import root_agent
+        _session_service = InMemorySessionService()
+        _adk_runner = Runner(
+            agent=root_agent,
+            app_name=APP_NAME,
+            session_service=_session_service
+        )
+    return _adk_runner, _session_service
+
+
 async def run_adk_agent(user_id: str, session_id: str, message: str) -> str:
+    from google.genai import types as genai_types
+    runner, session_service = get_adk()
+
     try:
         session = await session_service.get_session(
             app_name=APP_NAME, user_id=user_id, session_id=session_id
@@ -47,13 +56,14 @@ async def run_adk_agent(user_id: str, session_id: str, message: str) -> str:
         parts=[genai_types.Part(text=message)]
     )
     final_response = ""
-    async for event in adk_runner.run_async(
+    async for event in runner.run_async(
         user_id=user_id, session_id=session_id, new_message=content
     ):
         if event.is_final_response():
             if event.content and event.content.parts:
                 final_response = event.content.parts[0].text
     return final_response
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # ROUTES
@@ -120,7 +130,7 @@ Be warm, direct, and conversational. No bullet points, no markdown, no lists."""
 
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-3.1-pro-preview",
             contents=conversation
         )
         return jsonify({'answer': response.text.strip()})
@@ -181,7 +191,7 @@ Answer in plain English. Be warm, clear, 2-4 sentences max."""
 
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-3.1-pro-preview",
             contents=conversation
         )
         reply = response.text.strip()
@@ -191,14 +201,11 @@ Answer in plain English. Be warm, clear, 2-4 sentences max."""
     return jsonify({'reply': reply})
 
 
-# ── ADK AGENT ENDPOINTS ────────────────────────────────────────────────────────
+# ── ADK AGENT ENDPOINT ─────────────────────────────────────────────────────────
 
 @app.route('/agent', methods=['POST'])
 def agent():
-    """
-    ADK Multi-Agent endpoint.
-    Orchestrator routes to: visual_detective, live_sentinel, or educator_agent.
-    """
+    """ADK Multi-Agent endpoint — routes through the Phish Eye orchestrator."""
     data = request.get_json()
     if not data or not data.get('message'):
         return jsonify({'error': 'No message provided'}), 400

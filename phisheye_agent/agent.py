@@ -1,51 +1,124 @@
 """
-Phish Eye — ADK Multi-Agent System
-Orchestrator + 3 specialist agents: Visual Detective, Live Sentinel, Educator
+Phish Eye — ADK Multi-Agent System v2
+Orchestrator + 3 specialist agents with anti-hallucination grounding.
+All agents are grounded in verified FTC/FBI/AARP scam data via facts.py.
 """
 
 import os
 import base64
+import json
 from google.adk.agents import Agent
 from google import genai
+from facts import VERIFIED_FACTS, format_facts_for_prompt, get_facts_for_scam_type
 
 # ─────────────────────────────────────────────
-# TOOLS — these are what the agents can call
+# GROUNDING CONTEXT — injected into all agents
 # ─────────────────────────────────────────────
+GROUNDING_CONTEXT = format_facts_for_prompt()
+
+# ─────────────────────────────────────────────
+# TOOLS
+# ─────────────────────────────────────────────
+
+def get_verified_facts(topic: str) -> dict:
+    """
+    Retrieves verified, factual information about scam types from the
+    FTC, FBI IC3, and AARP Fraud Watch Network databases.
+    Use this tool BEFORE making any claim about how a scam works.
+
+    Args:
+        topic: The scam type or topic to look up
+               (e.g. "IRS scam", "gift cards", "voice cloning", "phishing")
+    Returns:
+        dict with verified facts, red flags, and reporting resources
+    """
+    topic_lower = topic.lower()
+
+    # Check scam types
+    facts = get_facts_for_scam_type(topic_lower)
+    if facts:
+        return {
+            "status": "found",
+            "source": "FTC/FBI IC3 verified data",
+            "facts": facts,
+            "reporting": VERIFIED_FACTS["reporting_resources"]
+        }
+
+    # Check payment methods
+    if any(word in topic_lower for word in ["gift card", "wire", "crypto", "bitcoin", "venmo", "zelle"]):
+        return {
+            "status": "found",
+            "source": "FTC verified data",
+            "facts": {
+                "key_fact": "Legitimate organizations NEVER request these payment methods",
+                "never_pay_via": VERIFIED_FACTS["payment_methods_never_used_by_legitimate_entities"],
+                "if_asked": "This is ALWAYS a scam. Hang up immediately."
+            },
+            "reporting": VERIFIED_FACTS["reporting_resources"]
+        }
+
+    # General safety rules
+    return {
+        "status": "general_safety",
+        "source": "FTC/AARP verified safety guidelines",
+        "facts": {
+            "safety_rules": VERIFIED_FACTS["safety_rules"],
+            "statistics": VERIFIED_FACTS["statistics"][:3]
+        },
+        "reporting": VERIFIED_FACTS["reporting_resources"]
+    }
+
 
 def scan_image_for_scams(image_b64: str) -> dict:
     """
-    Analyzes a base64-encoded image for scam indicators.
+    Analyzes a base64-encoded image for scam indicators using Gemini vision.
     Returns threat_level (SAFE/SUSPICIOUS/SCAM), red_flags, summary, and action.
-    
+
     Args:
         image_b64: Base64-encoded image string
     Returns:
         dict with threat_level, confidence, summary, red_flags, action, explanation
     """
-    import json
     client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-    
-    PROMPT = """You are an expert scam detection AI. Analyze this image for phishing, scams, or fraud.
 
-Respond ONLY with valid JSON in this exact format:
-{
+    PROMPT = f"""You are an expert scam detection AI. Analyze this image for phishing, scams, or fraud.
+
+{GROUNDING_CONTEXT}
+
+Look for these verified red flags:
+- Requests for gift card payments (ALWAYS a scam)
+- Urgency tactics ("act now", "account suspended", "you've been selected")
+- Suspicious sender addresses (misspellings, lookalike domains)
+- Requests for passwords, SSN, bank details
+- Prize/lottery winnings for contests never entered
+- IRS/government demanding immediate payment
+- Links that don't match the displayed text
+
+Respond ONLY with valid JSON:
+{{
   "threat_level": "SAFE" or "SUSPICIOUS" or "SCAM",
   "confidence": 85,
   "summary": "One sentence summary",
-  "red_flags": ["flag1", "flag2"],
-  "action": "What the user should do",
-  "explanation": "Simple explanation for non-tech users"
-}"""
+  "red_flags": ["specific flag 1", "specific flag 2"],
+  "action": "What the user should do right now",
+  "explanation": "Simple explanation for non-tech users",
+  "report_to": "Where to report this if it's a scam"
+}}"""
 
     try:
         image_bytes = base64.b64decode(image_b64)
-        image_part = {"inline_data": {"mime_type": "image/jpeg", "data": base64.b64encode(image_bytes).decode()}}
+        image_part = {
+            "inline_data": {
+                "mime_type": "image/jpeg",
+                "data": base64.b64encode(image_bytes).decode()
+            }
+        }
         response = client.models.generate_content(
             model="gemini-3.1-pro-preview",
             contents=[PROMPT, image_part]
         )
         text = response.text.strip()
-        if text.startswith("```"):
+        if "```" in text:
             text = text.split("```")[1]
             if text.startswith("json"):
                 text = text[4:]
@@ -55,41 +128,54 @@ Respond ONLY with valid JSON in this exact format:
             "threat_level": "SUSPICIOUS",
             "confidence": 50,
             "summary": "Could not fully analyze — treat with caution",
-            "red_flags": ["Analysis error — verify manually"],
+            "red_flags": ["Analysis encountered an error — verify manually"],
             "action": "When in doubt, do not click any links or provide personal info",
-            "explanation": f"Analysis encountered an issue: {str(e)}"
+            "explanation": "We had trouble analyzing this. If it asks for money, gift cards, or personal info — it's a scam.",
+            "report_to": "reportfraud.ftc.gov"
         }
 
 
 def analyze_call_transcript(transcript: str) -> dict:
     """
-    Analyzes a phone call transcript for scam patterns including
-    urgency tactics, impersonation, AI voice cloning signals, and money requests.
-    
+    Analyzes a phone call transcript for scam patterns using verified data.
+    Detects urgency tactics, impersonation, gift card requests, and AI voice cloning.
+
     Args:
         transcript: Text of what the caller said
     Returns:
-        dict with threat_level, scam_type, red_flags, and recommended_action
+        dict with threat_level, scam_type, red_flags, and action
     """
-    import json
     client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-    
-    PROMPT = f"""You are a scam call detection expert. Analyze this phone call transcript for scam patterns.
 
-Look for: urgency tactics, gift card requests, impersonation (IRS/bank/police), 
-AI voice cloning signals, prize scams, grandparent scams, tech support scams.
+    PROMPT = f"""You are a scam call detection expert with access to verified FTC and FBI data.
+
+{GROUNDING_CONTEXT}
+
+Analyze this phone call transcript for scam patterns:
 
 Transcript: "{transcript}"
+
+Check for these VERIFIED scam indicators:
+- IRS/SSA/Medicare impersonation (government agencies contact by mail first)
+- Gift card payment requests (ALWAYS a scam — no exceptions)
+- Urgency tactics: "act now", "don't hang up", "you'll be arrested"
+- Bank fraud alerts asking to "move money to a safe account"
+- Tech support claiming your computer has a virus
+- Prize/lottery requiring upfront payment
+- AI voice cloning patterns (unnatural speech, can't answer personal questions)
+- Grandparent scam (family emergency, requests secrecy)
 
 Respond ONLY with valid JSON:
 {{
   "threat_level": "SAFE" or "SUSPICIOUS" or "SCAM",
   "confidence": 90,
-  "scam_type": "Type of scam detected or None",
-  "summary": "One sentence summary",
-  "red_flags": ["flag1", "flag2"],
-  "action": "What to do right now",
-  "explanation": "Simple explanation"
+  "scam_type": "Specific type or None",
+  "summary": "One sentence",
+  "red_flags": ["specific flag 1", "specific flag 2"],
+  "action": "What to do RIGHT NOW — be direct",
+  "explanation": "Plain English explanation",
+  "verified_fact": "One verified fact that proves this is/isn't a scam",
+  "report_to": "Specific reporting resource"
 }}"""
 
     try:
@@ -98,7 +184,7 @@ Respond ONLY with valid JSON:
             contents=PROMPT
         )
         text = response.text.strip()
-        if text.startswith("```"):
+        if "```" in text:
             text = text.split("```")[1]
             if text.startswith("json"):
                 text = text[4:]
@@ -109,37 +195,56 @@ Respond ONLY with valid JSON:
             "confidence": 50,
             "scam_type": "Unknown",
             "summary": "Could not fully analyze",
-            "red_flags": ["Analysis error"],
-            "action": "Do not provide personal information or money",
-            "explanation": str(e)
+            "red_flags": ["Analysis error — treat with caution"],
+            "action": "Do not provide personal information or money. Hang up and call back on an official number.",
+            "verified_fact": "Legitimate organizations never demand immediate payment by phone.",
+            "report_to": "reportfraud.ftc.gov"
         }
 
 
 def get_scam_education(scam_type: str, user_question: str) -> dict:
     """
-    Provides educational information about a specific scam type.
-    Explains how the scam works, who is targeted, and how to report it.
-    
+    Provides verified educational information about scam types.
+    All responses are grounded in FTC, FBI IC3, and AARP data.
+
     Args:
-        scam_type: Type of scam (e.g. "IRS impersonation", "phishing email", "AI voice cloning")
+        scam_type: Type of scam (e.g. "IRS impersonation", "phishing email")
         user_question: The user's specific question
     Returns:
-        dict with explanation, how_it_works, who_is_targeted, how_to_report, and prevention_tips
+        dict with verified answer, facts, and reporting guidance
     """
-    import json
+    # First get verified facts
+    verified = get_facts_for_scam_type(scam_type)
     client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-    
-    PROMPT = f"""You are a friendly scam education expert. Answer this question about {scam_type} scams.
 
-User question: "{user_question}"
+    verified_context = ""
+    if verified:
+        verified_context = f"""
+Verified facts about {scam_type}:
+- Description: {verified.get('description', '')}
+- Key fact: {verified.get('fact', '')}
+- Report to: {verified.get('report_to', 'reportfraud.ftc.gov')}
+- Red flags: {', '.join(verified.get('red_flags', []))}
+"""
+
+    PROMPT = f"""You are a scam education expert. Answer this question using ONLY verified information.
+If you don't know something for certain, say "I'm not certain — please verify with the FTC at ftc.gov."
+NEVER make up statistics or facts.
+
+{GROUNDING_CONTEXT}
+{verified_context}
+
+Question: "{user_question}"
+About: {scam_type}
 
 Respond ONLY with valid JSON:
 {{
-  "answer": "Direct answer to the question in plain English",
-  "how_it_works": "Brief explanation of how this scam operates",
+  "answer": "Direct answer in plain English, citing verified sources",
+  "how_it_works": "Brief verified description of how this scam operates",
   "who_is_targeted": "Who scammers typically target",
-  "how_to_report": "Where and how to report this scam",
-  "prevention_tips": ["tip1", "tip2", "tip3"]
+  "how_to_report": "Specific verified reporting channel",
+  "prevention_tips": ["tip1 (verified)", "tip2 (verified)", "tip3 (verified)"],
+  "source": "FTC/FBI IC3/AARP"
 }}"""
 
     try:
@@ -148,47 +253,55 @@ Respond ONLY with valid JSON:
             contents=PROMPT
         )
         text = response.text.strip()
-        if text.startswith("```"):
+        if "```" in text:
             text = text.split("```")[1]
             if text.startswith("json"):
                 text = text[4:]
         return json.loads(text.strip())
     except Exception as e:
         return {
-            "answer": "I had trouble processing that question. Please try again.",
+            "answer": "I had trouble processing that. Please visit ftc.gov/scams for verified information.",
             "how_it_works": "",
             "who_is_targeted": "",
-            "how_to_report": "Report to FTC at reportfraud.ftc.gov",
-            "prevention_tips": ["Stay cautious", "Never share personal info"]
+            "how_to_report": "reportfraud.ftc.gov",
+            "prevention_tips": ["Never share personal info with unsolicited callers", "Verify by calling official numbers"],
+            "source": "FTC"
         }
 
 
 def check_url_safety(url: str) -> dict:
     """
-    Checks if a URL looks safe or suspicious based on common phishing patterns.
-    
+    Checks if a URL looks safe or suspicious based on verified phishing indicators.
+
     Args:
-        url: The URL to check
+        url: The URL to analyze
     Returns:
-        dict with is_suspicious, risk_level, reasons, and recommendation
+        dict with risk_level, reasons, and recommendation
     """
-    import json
     client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-    
-    PROMPT = f"""You are a cybersecurity expert analyzing URLs for phishing/scam indicators.
 
-Analyze this URL: {url}
+    PROMPT = f"""You are a cybersecurity expert. Analyze this URL for phishing indicators.
+Only report what you can verify from the URL itself — do NOT make up information.
 
-Check for: misspellings, lookalike domains, suspicious TLDs, IP addresses instead of domains,
-excessive subdomains, URL shorteners hiding destinations, and other red flags.
+URL: {url}
+
+Check for VERIFIED phishing indicators:
+- Misspelled brand names (paypa1.com, amaz0n.com, g00gle.com)
+- Lookalike domains (paypal-security.com, amazon-support.net)
+- Suspicious TLDs for well-known brands (.xyz, .tk, .ml)
+- IP addresses instead of domain names
+- Excessive subdomains (login.verify.account.paypal.com.evil.com)
+- URL shorteners hiding destination
+- HTTP instead of HTTPS for sensitive sites
 
 Respond ONLY with valid JSON:
 {{
   "is_suspicious": true or false,
   "risk_level": "LOW" or "MEDIUM" or "HIGH",
-  "reasons": ["reason1", "reason2"],
-  "recommendation": "What the user should do",
-  "legitimate_site": "What site this might be trying to impersonate, or null"
+  "reasons": ["specific reason based on URL structure"],
+  "recommendation": "What user should do",
+  "legitimate_site": "What site this might impersonate, or null",
+  "verified_check": "What specific thing in the URL triggered this assessment"
 }}"""
 
     try:
@@ -197,7 +310,7 @@ Respond ONLY with valid JSON:
             contents=PROMPT
         )
         text = response.text.strip()
-        if text.startswith("```"):
+        if "```" in text:
             text = text.split("```")[1]
             if text.startswith("json"):
                 text = text[4:]
@@ -206,9 +319,10 @@ Respond ONLY with valid JSON:
         return {
             "is_suspicious": True,
             "risk_level": "MEDIUM",
-            "reasons": ["Could not fully analyze URL"],
-            "recommendation": "Treat with caution — do not click until verified",
-            "legitimate_site": None
+            "reasons": ["Could not fully analyze — treat with caution"],
+            "recommendation": "Do not click until you can verify through official channels",
+            "legitimate_site": None,
+            "verified_check": "Analysis unavailable"
         }
 
 
@@ -219,96 +333,105 @@ Respond ONLY with valid JSON:
 visual_detective = Agent(
     model="gemini-3.1-pro-preview",
     name="visual_detective",
-    description="""Specialist agent for analyzing images and screenshots for scam content.
-    Use this agent when the user has uploaded or captured an image of a suspicious message,
-    email, text, or document that needs visual analysis.""",
-    instruction="""You are the Visual Detective — a specialist in analyzing images for scam content.
-    
-When given an image to analyze:
-1. Use the scan_image_for_scams tool to analyze it
-2. Present the results clearly and compassionately
-3. If it's a SCAM, be direct but calm — don't panic the user
-4. If SUSPICIOUS, explain what's concerning
-5. If SAFE, reassure the user
-6. Always end with a clear action step
+    description="""Specialist for analyzing images and screenshots for scam content.
+    Use when the user has an image of a suspicious message, email, or document.""",
+    instruction=f"""You are the Visual Detective — Phish Eye's specialist for image analysis.
 
-Remember: users are often scared or embarrassed. Be warm and supportive.""",
-    tools=[scan_image_for_scams, check_url_safety]
+{GROUNDING_CONTEXT}
+
+ANTI-HALLUCINATION RULES:
+1. ALWAYS use scan_image_for_scams tool first before making any claims
+2. NEVER invent red flags not present in the image
+3. If confidence is below 70%, say "I'm not 100% certain — here's what I found..."
+4. ALWAYS cite the verified fact that supports your conclusion
+5. For URLs in images, use check_url_safety tool
+
+When presenting results:
+- SCAM: Be direct — "This is a scam. Here's why..." then cite the verified fact
+- SUSPICIOUS: "This has red flags. I'm not 100% certain, but..."
+- SAFE: "This looks legitimate. Here's why..."
+- Always end with the specific action step and reporting resource""",
+    tools=[scan_image_for_scams, check_url_safety, get_verified_facts]
 )
 
 live_sentinel = Agent(
     model="gemini-3.1-pro-preview",
     name="live_sentinel",
-    description="""Specialist agent for analyzing phone call transcripts and detecting
-    scam calls in real time. Use when the user is on a suspicious call or describing
-    what a caller said.""",
-    instruction="""You are the Live Sentinel — a specialist in detecting scam phone calls.
+    description="""Specialist for analyzing phone call transcripts and detecting scam calls.
+    Use when the user is on a suspicious call or describing what a caller said.""",
+    instruction=f"""You are the Live Sentinel — Phish Eye's specialist for call analysis.
 
-When analyzing a call:
-1. Use analyze_call_transcript to check for scam patterns
-2. Be URGENT if it's a SCAM — the user may be on the call RIGHT NOW
-3. Tell them clearly: "This is a scam. Hang up now."
-4. Explain what type of scam it is
-5. Tell them what to do next (report, block, etc.)
+{GROUNDING_CONTEXT}
 
-Common scams to watch for: IRS impersonation, bank fraud alerts, grandparent scams,
-tech support scams, prize/lottery scams, AI voice cloning of family members.""",
-    tools=[analyze_call_transcript, get_scam_education]
+ANTI-HALLUCINATION RULES:
+1. ALWAYS use analyze_call_transcript tool first
+2. Use get_verified_facts to confirm scam type before claiming something is a scam
+3. NEVER claim a specific dollar amount was lost unless it's in the verified data
+4. Always cite the specific verified fact that identifies the scam pattern
+5. If uncertain, say "This matches the pattern of X scam, but I recommend verifying"
+
+URGENT RESPONSE PROTOCOL:
+- If SCAM detected: Lead with "⚠️ HANG UP NOW — this is a scam"
+- State the scam type and ONE verified fact proving it
+- Give the specific reporting resource
+- User may be on the call RIGHT NOW — be fast and clear""",
+    tools=[analyze_call_transcript, get_verified_facts]
 )
 
 educator_agent = Agent(
     model="gemini-3.1-pro-preview",
     name="educator_agent",
-    description="""Specialist agent for answering questions about scams, explaining how
-    they work, and providing advice on what to do after encountering a scam.""",
-    instruction="""You are the Educator — a warm, patient expert who explains scams simply.
+    description="""Specialist for answering questions about scams and providing verified advice.
+    Use for follow-up questions, how-to-report queries, and general scam education.""",
+    instruction=f"""You are the Educator — Phish Eye's warm, knowledgeable scam advisor.
 
-Your job:
-1. Answer questions about specific scam types using get_scam_education
-2. Explain scams in plain language — no jargon
-3. Provide clear reporting guidance
-4. Check suspicious URLs using check_url_safety
-5. Be encouraging — scams happen to everyone, it's not the user's fault
+{GROUNDING_CONTEXT}
 
-Always remind users: Report scams to reportfraud.ftc.gov (USA) or their local authority.""",
-    tools=[get_scam_education, check_url_safety]
+ANTI-HALLUCINATION RULES:
+1. ALWAYS use get_verified_facts before explaining how a scam works
+2. ALWAYS use get_scam_education for detailed questions
+3. NEVER invent statistics — only use facts from the verified database
+4. If you don't know something, say "I'm not certain — please check ftc.gov"
+5. For URLs, use check_url_safety tool
+
+Your style:
+- Warm and reassuring — scams happen to smart people
+- Plain English — no jargon
+- Always end with a specific reporting resource
+- Remind users: "It's not your fault — these scammers are professionals" """,
+    tools=[get_scam_education, check_url_safety, get_verified_facts]
 )
 
-
 # ─────────────────────────────────────────────
-# ORCHESTRATOR — the main agent
+# ORCHESTRATOR
 # ─────────────────────────────────────────────
 
 root_agent = Agent(
     model="gemini-3.1-pro-preview",
     name="phisheye_orchestrator",
-    description="Phish Eye AI orchestrator — routes scam detection requests to specialist agents",
-    instruction="""You are the Phish Eye Orchestrator — the central intelligence of the Phish Eye scam detection system.
+    description="Phish Eye central orchestrator — routes to specialist agents",
+    instruction=f"""You are the Phish Eye Orchestrator — the central intelligence protecting users from scams.
 
-Your role is to understand what the user needs and route to the right specialist:
+{GROUNDING_CONTEXT}
 
-1. **Image/screenshot analysis** → transfer to visual_detective
-   - User uploaded an image, screenshot, photo
-   - User captured something with their camera
-   - User says "look at this" with an image
+ROUTING RULES:
+1. Image/screenshot/camera → transfer to visual_detective
+2. Phone call/transcript/caller said → transfer to live_sentinel
+3. Questions/education/what should I do/URL check → transfer to educator_agent
 
-2. **Phone call analysis** → transfer to live_sentinel  
-   - User is on a suspicious call right now
-   - User describes what a caller said
-   - User pastes a call transcript
-   - User mentions getting a call from IRS, bank, Microsoft, etc.
+ANTI-HALLUCINATION RULES:
+1. NEVER make up scam statistics
+2. NEVER claim something is safe or a scam without routing to a specialist
+3. Always use get_verified_facts if you need to cite data
+4. If uncertain about routing, ask one clarifying question
 
-3. **Questions and education** → transfer to educator_agent
-   - User asks "is this a scam?"
-   - User asks "what should I do?"
-   - User wants to know how to report
-   - User asks about a suspicious URL or link
-   - General scam questions
+PERSONA:
+- Warm, protective, like a knowledgeable friend
+- Direct when danger is present
+- Reassuring when the user is scared
+- Never condescending about falling for scams
 
-Always be warm, clear, and direct. The people using Phish Eye may be scared or
-confused. Your job is to protect them and make them feel supported.
-
-Opening message if the user just says hello: Introduce yourself as Phish Eye and
-ask what they need help with — image to analyze, suspicious call, or a question.""",
-    sub_agents=[visual_detective, live_sentinel, educator_agent]
+Opening: If user says hello, introduce as Phish Eye and ask what they need help with.""",
+    sub_agents=[visual_detective, live_sentinel, educator_agent],
+    tools=[get_verified_facts]
 )

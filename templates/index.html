@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhishEyes — Your Personal Scam Guardian</title>
+    <title>PhishEye — Your Personal Scam Guardian</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -755,7 +755,7 @@
             <circle cx="22.5" cy="19.5" r="1.2" fill="white"/>
         </svg>
         <div>
-            <div class="brand">Phish<span>Eyes</span></div>
+            <div class="brand">Phish<span>Eye</span></div>
             <div class="brand-sub">AI Scam Guardian</div>
         </div>
     </div>
@@ -771,7 +771,7 @@
     <div class="hero">
         <div class="hero-eyebrow">✦ AI-Powered Scam Detection</div>
         <h2>Stay Safe from <span class="highlight">Scams</span><br>in Seconds</h2>
-        <p>Got a suspicious message, email, or call? Let PhishEyes check it instantly — no tech knowledge needed.</p>
+        <p>Got a suspicious message, email, or call? Let PhishEye check it instantly — no tech knowledge needed.</p>
         <div class="trust-row">
             <div class="trust-pill">🔒 Private & Secure</div>
             <div class="trust-pill">⚡ Instant Results</div>
@@ -825,7 +825,7 @@
         <div class="voice-zone">
             <div class="voice-status-bar">
                 <div class="voice-status-indicator idle" id="voiceIndicator"></div>
-                <div class="voice-status-text idle" id="voiceStatusText">PhishEyes Live Agent • Ready</div>
+                <div class="voice-status-text idle" id="voiceStatusText">PhishEye Live Agent • Ready</div>
                 <button class="voice-end-btn" id="voiceEndBtn" onclick="endLiveSession()">End session</button>
             </div>
             <div class="voice-transcript-feed" id="voiceFeed">
@@ -861,7 +861,7 @@
             <div class="call-hero">
                 <div class="call-hero-icon">📞</div>
                 <h3>Live Call Guardian</h3>
-                <p>Getting a suspicious call? Type what the caller is saying and PhishEyes will analyze it in real time — detecting scam patterns, urgency tactics, and AI voice cloning signals.</p>
+                <p>Getting a suspicious call? Type what the caller is saying and PhishEye will analyze it in real time — detecting scam patterns, urgency tactics, and AI voice cloning signals.</p>
                 <div class="live-call-status" id="callStatus">
                     <div class="call-status-dot"></div>
                     <span id="callStatusText">Not monitoring</span>
@@ -977,7 +977,7 @@
         <div class="chat-panel-header">
             <div class="chat-panel-avatar">🛡️</div>
             <div class="chat-panel-info">
-                <h4>Ask PhishEyes</h4>
+                <h4>Ask PhishEye</h4>
                 <p>Ask anything about this scan result</p>
             </div>
             <div class="chat-online-dot"></div>
@@ -1001,7 +1001,7 @@
 </div>
 
 <footer>
-    🛡️ PhishEyes — Built for the <a href="#">Gemini Live Agent Challenge</a><br>
+    🛡️ PhishEye — Built for the <a href="#">Gemini Live Agent Challenge</a><br>
     Protecting everyday people from scams with AI • Free forever
 </footer>
 
@@ -1356,10 +1356,10 @@ function setVoiceState(state) {
     statusText.className = 'voice-status-text ' + state;
 
     const labels = {
-        idle: 'PhishEyes Live Agent • Ready',
+        idle: 'PhishEye Live Agent • Ready',
         listening: '🔴 Listening… speak now',
-        thinking: '💭 PhishEyes is thinking…',
-        speaking: '🔊 PhishEyes is speaking…'
+        thinking: '💭 PhishEye is thinking…',
+        speaking: '🔊 PhishEye is speaking…'
     };
     statusText.textContent = labels[state];
     micBtn.className = 'live-mic-btn ' + (state !== 'idle' ? state : '');
@@ -1392,7 +1392,7 @@ function startLiveAgent() {
     document.getElementById('voiceEndBtn').classList.add('visible');
     document.getElementById('voiceSuggestions').style.display = 'none';
 
-    const greeting = "Hi! I'm PhishEyes. I'm here to help you stay safe from scams. Ask me anything — describe a suspicious message, a weird call, or anything that feels off.";
+    const greeting = "Hi! I'm PhishEye. I'm here to help you stay safe from scams. Ask me anything — describe a suspicious message, a weird call, or anything that feels off.";
     appendVoiceLine('agent', greeting);
     agentConversationHistory.push({ role: 'assistant', content: greeting });
     speakThenListen(greeting);
@@ -1470,7 +1470,7 @@ function appendVoiceLine(role, text) {
     div.className = 'voice-line ' + role;
     const label = document.createElement('div');
     label.className = 'voice-line-label';
-    label.textContent = role === 'agent' ? 'PhishEyes' : 'You';
+    label.textContent = role === 'agent' ? 'PhishEye' : 'You';
     const textDiv = document.createElement('div');
     textDiv.className = 'voice-line-text';
     textDiv.textContent = text;
@@ -1513,7 +1513,7 @@ function startCallMonitor() {
     document.getElementById('callStatusText').textContent = 'Monitoring active';
     document.getElementById('callNoAlerts').style.display = 'none';
 
-    addCallAlert('safe', '🛡️', 'Monitoring started. Type what the caller says or speak — PhishEyes is watching.');
+    addCallAlert('safe', '🛡️', 'Monitoring started. Type what the caller says or speak — PhishEye is watching.');
 
     // Start live speech recognition for call monitoring
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {

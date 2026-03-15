@@ -1,5 +1,6 @@
 import os
-from flask import Flask, request, jsonify, render_template
+import base64
+from flask import Flask, request, jsonify, render_template, Response
 from scanner import analyze_image
 from dotenv import load_dotenv
 from google import genai
@@ -17,17 +18,31 @@ def index():
 
 @app.route('/health')
 def health():
-    return jsonify({'status': 'PhishEyes is running!', 'version': '1.0'})
+    return jsonify({'status': 'PhishEye is running!', 'version': '1.0'})
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
-    if 'image' not in request.files:
+    # Support both multipart file upload AND base64 JSON
+    if request.files and 'image' in request.files:
+        file = request.files['image']
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+        image_data = file.read()
+        mime_type = file.content_type or 'image/jpeg'
+
+    elif request.is_json:
+        data = request.get_json()
+        if not data or 'image' not in data:
+            return jsonify({'error': 'No image provided'}), 400
+        try:
+            image_data = base64.b64decode(data['image'])
+        except Exception:
+            return jsonify({'error': 'Invalid base64 image data'}), 400
+        mime_type = data.get('mime_type', 'image/jpeg')
+
+    else:
         return jsonify({'error': 'No image provided'}), 400
-    file = request.files['image']
-    if file.filename == '':
-        return jsonify({'error': 'No file selected'}), 400
-    image_data = file.read()
-    mime_type = file.content_type or 'image/jpeg'
+
     try:
         result = analyze_image(image_data, mime_type)
         return jsonify(result)
@@ -40,16 +55,16 @@ def voice_analyze():
     question = data.get('question', '')
     history = data.get('history', [])
 
-    system = """You are PhishEyes, a friendly spoken AI scam assistant.
+    system = """You are PhishEye, a friendly spoken AI scam assistant.
 Answer in 1-2 SHORT punchy sentences ONLY — your response will be read aloud.
 Be warm, direct, and conversational. No bullet points, no markdown, no lists."""
 
     conversation = system + "\n\n"
     for entry in history[-6:]:
         if entry.get('role') in ('user', 'assistant'):
-            role = "User" if entry['role'] == 'user' else "PhishEyes"
+            role = "User" if entry['role'] == 'user' else "PhishEye"
             conversation += f"{role}: {entry['content']}\n"
-    conversation += f"User: {question}\nPhishEyes:"
+    conversation += f"User: {question}\PhishEye:"
 
     try:
         response = client.models.generate_content(
@@ -62,19 +77,21 @@ Be warm, direct, and conversational. No bullet points, no markdown, no lists."""
 
 @app.route('/tts', methods=['POST'])
 def text_to_speech():
-    """Convert text to speech using Google Cloud TTS for better voice quality."""
-    import base64
-    from google.cloud import texttospeech
-    
+    """Convert text to speech using Google Cloud TTS, with browser fallback."""
     data = request.get_json()
-    text = data.get('text', '')
-    
+    if not data or not data.get('text'):
+        return jsonify({'error': 'No text provided', 'fallback': True}), 400
+
+    text = data['text']
+
     try:
+        from google.cloud import texttospeech
+
         tts_client = texttospeech.TextToSpeechClient()
         synthesis_input = texttospeech.SynthesisInput(text=text)
         voice = texttospeech.VoiceSelectionParams(
             language_code="en-US",
-            name="en-US-Journey-F",  # Natural, expressive female voice
+            name="en-US-Journey-F",
             ssml_gender=texttospeech.SsmlVoiceGender.FEMALE
         )
         audio_config = texttospeech.AudioConfig(
@@ -89,8 +106,10 @@ def text_to_speech():
         )
         audio_b64 = base64.b64encode(response.audio_content).decode('utf-8')
         return jsonify({'audio': audio_b64})
+
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        # Graceful fallback — frontend will use browser speechSynthesis
+        return jsonify({'fallback': True, 'reason': str(e)}), 200
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -99,7 +118,7 @@ def chat():
     history = data.get('history', [])
     scan_context = data.get('scan_context', {})
 
-    system_prompt = f"""You are PhishEyes, a friendly AI scam detection assistant.
+    system_prompt = f"""You are PhishEye, a friendly AI scam detection assistant.
 You just analyzed a message for the user. Here are your findings:
 Threat Level: {scan_context.get('threat_level', 'UNKNOWN')}
 Summary: {scan_context.get('summary', '')}
@@ -112,9 +131,9 @@ Answer in plain English. Users are NOT tech-savvy. Be warm, clear, 2-4 sentences
     conversation = system_prompt + "\n\n"
     for entry in history[-8:]:
         if entry.get('role') in ('user', 'assistant'):
-            role = "User" if entry['role'] == 'user' else "PhishEyes"
+            role = "User" if entry['role'] == 'user' else "PhishEye"
             conversation += f"{role}: {entry['content']}\n"
-    conversation += f"User: {message}\nPhishEyes:"
+    conversation += f"User: {message}\PhishEye:"
 
     try:
         response = client.models.generate_content(

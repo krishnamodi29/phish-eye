@@ -9,7 +9,7 @@ load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 SCAM_DETECTION_PROMPT = """
-You are PhishEyes, an expert cybersecurity AI that detects scams.
+You are PhishEye, an expert cybersecurity AI that detects scams.
 
 Analyze this image carefully and look for these red flags:
 - Fake urgency ("act now", "expires in 24 hours", "immediate action required")

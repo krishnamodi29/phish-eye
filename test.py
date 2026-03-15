@@ -8,7 +8,7 @@ client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 response = client.models.generate_content(
     model="gemini-3.1-pro-preview",
-    contents="Say hello from PhishEyes!"
+    contents="Say hello from PhishEye!"
 )
 
 print(response.text)

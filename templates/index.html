@@ -46,7 +46,7 @@
         /* ── HEADER ── */
         header {
             background: var(--white);
-            padding: 16px 32px;
+            padding: 7px 32px;
             border-bottom: 1.5px solid var(--border);
             display: flex;
             align-items: center;
@@ -58,12 +58,12 @@
         }
 
         .logo-wrap { display: flex; align-items: center; gap: 12px; }
-        .logo-svg { width: 42px; height: 42px; flex-shrink: 0; }
+        .logo-svg { width: 100px; height: 100px; flex-shrink: 0; }
 
         .brand {
             font-family: 'Nunito', sans-serif;
             font-weight: 900;
-            font-size: 30px;
+            font-size: 38px;
             color: var(--ink);
             letter-spacing: -1px;
             line-height: 1;
@@ -71,7 +71,7 @@
         .brand span { color: var(--coral); }
 
         .brand-sub {
-            font-size: 11px;
+            font-size: 18px;
             font-weight: 600;
             color: var(--muted);
             letter-spacing: 0.05em;
@@ -83,7 +83,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 12px;
+            font-size: 14px;
             color: var(--muted);
             font-weight: 600;
         }
@@ -747,15 +747,10 @@
 
 <header>
     <div class="logo-wrap">
-        <svg class="logo-svg" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M21 3L6 9.5V20C6 28.5 12.8 35.4 21 37C29.2 35.4 36 28.5 36 20V9.5L21 3Z" fill="#FF6B4A" opacity="0.12"/>
-            <path d="M21 3L6 9.5V20C6 28.5 12.8 35.4 21 37C29.2 35.4 36 28.5 36 20V9.5L21 3Z" stroke="#FF6B4A" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M12 21C12 21 15.5 15 21 15C26.5 15 30 21 30 21C30 21 26.5 27 21 27C15.5 27 12 21 12 21Z" fill="white" stroke="#FF6B4A" stroke-width="1.5"/>
-            <circle cx="21" cy="21" r="4" fill="#FF6B4A"/>
-            <circle cx="22.5" cy="19.5" r="1.2" fill="white"/>
-        </svg>
+        <img src="/static/logo.png" class="logo-svg" alt="Phish Eye" style="width:100px;height:100px;object-fit:contain;">
+
         <div>
-            <div class="brand">Phish<span>Eye</span></div>
+            <div class="brand">Phish <span>Eye</span></div>
             <div class="brand-sub">AI Scam Guardian</div>
         </div>
     </div>

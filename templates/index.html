@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhishEye — Your Personal Scam Guardian</title>
+    <title>Phish Eye — Your Personal Scam Guardian</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800;900&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --coral: #FF6B4A;
@@ -21,7 +21,7 @@
             --muted: #8888A8;
             --border: #EEEEF5;
             --white: #FFFFFF;
-            --bg: #FBF9FF;
+            --bg: #F5F3FF;
             --safe-bg: #E8FAF4;
             --safe-text: #0A7C5C;
             --warn-bg: #FFF5E0;
@@ -33,7 +33,6 @@
             --shadow: 0 4px 24px rgba(26,26,46,0.08);
             --shadow-lg: 0 12px 48px rgba(26,26,46,0.12);
         }
-        body { background: #fdfaf2; }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -44,9 +43,31 @@
             min-height: 100vh;
         }
 
-        /* ── HEADER ── */
+        #bgCanvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        #ov {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 9;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        header, .container, footer {
+            position: relative;
+            z-index: 10;
+        }
+
         header {
-            background: var(--white);
+            background: var(--white) !important;
             padding: 7px 32px;
             border-bottom: 1.5px solid var(--border);
             display: flex;
@@ -59,703 +80,12 @@
         }
 
         .logo-wrap { display: flex; align-items: center; gap: 12px; }
-        .logo-svg { width: 100px; height: 100px; flex-shrink: 0; }
-
-        .brand {
-            font-family: 'Sora', sans-serif;
-            font-weight: 900;
-            font-size: 38px;
-            color: var(--ink);
-            letter-spacing: -1px;
-            line-height: 1;
-        }
+        .logo-svg { width: 100px; height: 100px; flex-shrink: 0; object-fit: contain; }
+        .brand { font-weight: 900; font-size: 38px; color: var(--ink); letter-spacing: -1px; line-height: 1; }
         .brand span { color: var(--coral); }
+        .brand-sub { font-size: 18px; font-weight: 600; color: var(--muted); letter-spacing: 0.05em; margin-top: 2px; }
 
-        .brand-sub {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--muted);
-            letter-spacing: 0.05em;
-            margin-top: 2px;
-        }
-
-        .header-right {
-            margin-left: auto;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            color: var(--muted);
-            font-weight: 600;
-        }
-
-        .gemini-badge {
-            background: linear-gradient(135deg, #4285F4, #EA4335, #FBBC04, #34A853);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 700;
-            font-size: 13px;
-        }
-
-        /* ── LAYOUT ── */
-        .container {
-            max-width: 780px;
-            margin: 0 auto;
-            padding: 0 20px 80px;
-        }
-
-        /* ── HERO ── */
-        .hero {
-            text-align: center;
-            padding: 44px 0 28px;
-        }
-
-        .hero-eyebrow {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--coral-pale);
-            color: var(--coral);
-            font-size: 12px;
-            font-weight: 700;
-            padding: 6px 14px;
-            border-radius: 40px;
-            margin-bottom: 16px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .hero h2 {
-            font-family: 'Nunito', sans-serif;
-            font-size: 40px;
-            font-weight: 900;
-            line-height: 1.15;
-            color: var(--ink);
-            margin-bottom: 12px;
-            letter-spacing: -1px;
-        }
-
-        .hero h2 .highlight {
-            color: var(--coral);
-            position: relative;
-            display: inline-block;
-        }
-
-        .hero h2 .highlight::after {
-            content: '';
-            position: absolute;
-            bottom: 2px; left: 0; right: 0;
-            height: 4px;
-            background: var(--amber);
-            border-radius: 4px;
-            opacity: 0.5;
-        }
-
-        .hero p {
-            color: var(--ink-soft);
-            font-size: 15px;
-            max-width: 460px;
-            margin: 0 auto 20px;
-            line-height: 1.7;
-        }
-
-        .trust-row {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .trust-pill {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--white);
-            border: 1.5px solid var(--border);
-            padding: 5px 12px;
-            border-radius: 40px;
-            font-size: 11.5px;
-            font-weight: 600;
-            color: var(--ink-soft);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        }
-
-        /* ── TABS ── */
-        .tabs {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            background: var(--white);
-            border-radius: var(--radius);
-            padding: 6px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-            gap: 4px;
-            border: 1.5px solid var(--border);
-        }
-
-        .tab {
-            padding: 11px 8px;
-            border: none;
-            background: transparent;
-            border-radius: var(--radius-sm);
-            font-family: 'Sora', sans-serif;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            color: var(--muted);
-            transition: all 0.25s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            white-space: nowrap;
-        }
-
-        .tab:hover:not(.active) { background: var(--bg); color: var(--ink-soft); }
-        .tab.active {
-            background: var(--coral);
-            color: var(--white);
-            box-shadow: 0 4px 14px rgba(255,107,74,0.35);
-        }
-
-        .tab.call-tab.active {
-            background: linear-gradient(135deg, #e63946, #c1121f);
-            box-shadow: 0 4px 14px rgba(230,57,70,0.4);
-        }
-
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeSlide 0.25s ease; }
-
-        @keyframes fadeSlide {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ── UPLOAD ── */
-        .upload-zone {
-            padding: 52px 32px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            border: 2.5px dashed var(--border);
-            border-radius: var(--radius);
-            background: var(--white);
-        }
-
-        .upload-zone:hover, .upload-zone.dragover {
-            border-color: var(--coral);
-            background: var(--coral-pale);
-            transform: scale(1.005);
-        }
-
-        .upload-icon {
-            width: 68px; height: 68px;
-            background: var(--coral-pale);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            margin: 0 auto 16px;
-            transition: transform 0.25s;
-        }
-
-        .upload-zone:hover .upload-icon { transform: scale(1.1) rotate(-5deg); }
-        .upload-zone h3 { font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 800; color: var(--ink); margin-bottom: 6px; }
-        .upload-zone p { color: var(--muted); font-size: 13px; line-height: 1.6; }
-        .upload-hint { display: inline-block; margin-top: 12px; background: var(--coral-pale); color: var(--coral); font-size: 11.5px; font-weight: 600; padding: 4px 12px; border-radius: 40px; }
-        #fileInput { display: none; }
-
-        .preview { display: none; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); border: 1.5px solid var(--border); background: var(--white); }
-        .preview img { width: 100%; max-height: 340px; object-fit: contain; display: block; background: #f8f8fb; }
-        .preview-bar { padding: 11px 18px; background: var(--white); display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); }
-        .preview-name { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); }
-        .preview-change { font-size: 12px; color: var(--coral); font-weight: 600; cursor: pointer; border: none; background: none; font-family: 'Sora', sans-serif; }
-
-        .analyze-btn {
-            width: 100%;
-            padding: 16px;
-            background: var(--coral);
-            border: none;
-            border-radius: var(--radius-sm);
-            color: var(--white);
-            font-family: 'Nunito', sans-serif;
-            font-size: 17px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: none;
-            margin-top: 14px;
-            box-shadow: 0 6px 20px rgba(255,107,74,0.35);
-        }
-
-        .analyze-btn:hover { background: #e85a3a; transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,107,74,0.4); }
-
-        /* ── CAMERA ── */
-        .camera-zone { border-radius: var(--radius); overflow: hidden; border: 1.5px solid var(--border); background: var(--white); box-shadow: var(--shadow); }
-        #cameraFeed { width: 100%; max-height: 360px; object-fit: cover; background: var(--ink); display: block; }
-        .camera-controls { padding: 14px 18px; display: flex; gap: 10px; justify-content: center; }
-        .cam-btn { padding: 11px 20px; border: none; border-radius: var(--radius-sm); font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-        .cam-btn.primary { background: var(--coral); color: white; box-shadow: 0 4px 12px rgba(255,107,74,0.3); }
-        .cam-btn.primary:hover { background: #e85a3a; transform: translateY(-1px); }
-        .cam-btn.secondary { background: var(--bg); color: var(--ink-soft); border: 1.5px solid var(--border); }
-
-        /* ── LOADING ── */
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 48px 32px;
-            background: var(--white);
-            border-radius: var(--radius);
-            margin-top: 16px;
-            box-shadow: var(--shadow);
-            border: 1.5px solid var(--border);
-        }
-
-        .loader-eye { width: 56px; height: 56px; margin: 0 auto 18px; position: relative; }
-        .loader-eye-outer { width: 56px; height: 56px; border: 3px solid var(--coral-pale); border-top-color: var(--coral); border-radius: 50%; animation: spin 0.9s linear infinite; }
-        .loader-eye-inner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 20px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .loading h4 { font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 800; color: var(--ink); margin-bottom: 6px; }
-        .loading p { color: var(--muted); font-size: 13px; line-height: 1.6; }
-        .loading-dots { display: flex; justify-content: center; gap: 6px; margin-top: 14px; }
-        .loading-dots span { width: 7px; height: 7px; border-radius: 50%; background: var(--coral); opacity: 0.3; animation: dotBounce 1.2s ease-in-out infinite; }
-        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes dotBounce { 0%,80%,100% { opacity:0.3; transform:translateY(0); } 40% { opacity:1; transform:translateY(-5px); } }
-
-        /* ── RESULT ── */
-        .result { display: none; border-radius: var(--radius); overflow: hidden; margin-top: 16px; box-shadow: var(--shadow-lg); border: 1.5px solid var(--border); animation: fadeSlide 0.3s ease; }
-
-        .verdict-header { padding: 32px 28px 24px; text-align: center; }
-        .verdict-header.SAFE { background: linear-gradient(160deg, #E8FAF4, #F0FDF9); }
-        .verdict-header.SUSPICIOUS { background: linear-gradient(160deg, #FFF8EC, #FFF5DC); }
-        .verdict-header.SCAM { background: linear-gradient(160deg, #FFF0EE, #FFE8E5); }
-
-        .verdict-icon { width: 76px; height: 76px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 12px; }
-        .verdict-icon.SAFE { background: var(--safe-bg); }
-        .verdict-icon.SUSPICIOUS { background: var(--warn-bg); }
-        .verdict-icon.SCAM { background: var(--danger-bg); }
-
-        .verdict-tag { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 5px; }
-        .verdict-tag.SAFE { color: var(--safe-text); }
-        .verdict-tag.SUSPICIOUS { color: var(--warn-text); }
-        .verdict-tag.SCAM { color: var(--danger-text); }
-
-        .verdict-title { font-family: 'Nunito', sans-serif; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 8px; }
-        .verdict-title.SAFE { color: var(--safe-text); }
-        .verdict-title.SUSPICIOUS { color: var(--warn-text); }
-        .verdict-title.SCAM { color: var(--danger-text); }
-
-        .confidence-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 40px; background: rgba(255,255,255,0.8); font-size: 11.5px; font-weight: 600; color: var(--ink-soft); border: 1px solid rgba(0,0,0,0.06); }
-
-        .speak-verdict-btn {
-            display: inline-flex; align-items: center; gap: 6px;
-            margin-top: 12px;
-            background: rgba(255,255,255,0.7);
-            border: 1.5px solid rgba(0,0,0,0.08);
-            border-radius: 40px; padding: 6px 16px;
-            font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 600;
-            color: var(--ink-soft); cursor: pointer; transition: all 0.2s;
-        }
-        .speak-verdict-btn:hover { background: white; border-color: var(--coral); color: var(--coral); }
-        .speak-verdict-btn.speaking { background: var(--coral-pale); border-color: var(--coral); color: var(--coral); }
-
-        .result-body { background: var(--white); padding: 26px 28px; }
-        .result-section { margin-bottom: 22px; }
-        .result-section:last-child { margin-bottom: 0; }
-
-        .section-label { display: flex; align-items: center; gap: 8px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 9px; }
-        .section-label .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--coral); }
-        .result-section p { font-size: 14px; line-height: 1.75; color: var(--ink-soft); }
-
-        .action-card { border-radius: var(--radius-sm); padding: 14px 18px; font-size: 14px; font-weight: 500; line-height: 1.7; border-left: 4px solid; }
-        .action-card.SAFE { background: var(--safe-bg); color: var(--safe-text); border-left-color: var(--mint); }
-        .action-card.SUSPICIOUS { background: var(--warn-bg); color: var(--warn-text); border-left-color: var(--amber); }
-        .action-card.SCAM { background: var(--danger-bg); color: var(--danger-text); border-left-color: var(--coral); }
-
-        .flags-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
-        .flag-chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px; border-radius: 40px; font-size: 12px; font-weight: 600; background: #FFF0EE; color: #C0200F; border: 1px solid #FFCCC7; }
-
-        .divider { height: 1.5px; background: var(--border); margin: 20px 0; }
-
-        .scan-again-btn { width: 100%; padding: 13px; background: var(--bg); border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'Sora', sans-serif; color: var(--ink-soft); font-size: 13.5px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .scan-again-btn:hover { background: var(--border); color: var(--ink); }
-
-        /* ── CHAT PANEL ── */
-        .chat-panel {
-            display: none;
-            margin-top: 16px;
-            background: var(--white);
-            border-radius: var(--radius);
-            border: 1.5px solid var(--border);
-            box-shadow: var(--shadow);
-            overflow: hidden;
-            animation: fadeSlide 0.3s ease;
-        }
-
-        .chat-panel-header {
-            padding: 16px 20px;
-            border-bottom: 1.5px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: linear-gradient(135deg, var(--coral-pale), var(--amber-pale));
-        }
-
-        .chat-panel-avatar { width: 36px; height: 36px; background: var(--coral); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-        .chat-panel-info h4 { font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 800; color: var(--ink); margin-bottom: 1px; }
-        .chat-panel-info p { font-size: 11.5px; color: var(--muted); font-weight: 600; }
-
-        .chat-online-dot { width: 8px; height: 8px; background: var(--mint); border-radius: 50%; margin-left: auto; box-shadow: 0 0 0 2px rgba(46,207,176,0.25); animation: onlinePulse 2s ease-in-out infinite; }
-        @keyframes onlinePulse { 0%,100% { box-shadow: 0 0 0 2px rgba(46,207,176,0.25); } 50% { box-shadow: 0 0 0 5px rgba(46,207,176,0.1); } }
-
-        .chat-messages { height: 280px; overflow-y: auto; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
-        .chat-messages::-webkit-scrollbar { width: 4px; }
-        .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-        .chat-msg { display: flex; gap: 9px; align-items: flex-end; animation: fadeSlide 0.2s ease; }
-        .chat-msg.user { flex-direction: row-reverse; }
-        .chat-msg-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-        .chat-msg.agent .chat-msg-avatar { background: var(--coral-pale); }
-        .chat-msg.user .chat-msg-avatar { background: var(--sky); color: white; font-size: 11px; font-weight: 700; }
-
-        .chat-bubble { max-width: 78%; padding: 10px 14px; border-radius: 16px; font-size: 13.5px; line-height: 1.65; }
-        .chat-msg.agent .chat-bubble { background: var(--bg); border: 1.5px solid var(--border); color: var(--ink); border-bottom-left-radius: 4px; }
-        .chat-msg.user .chat-bubble { background: var(--coral); color: white; border-bottom-right-radius: 4px; }
-
-        .chat-typing { display: flex; align-items: center; gap: 4px; padding: 10px 14px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 16px; border-bottom-left-radius: 4px; width: fit-content; }
-        .chat-typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: typingDot 1.2s ease-in-out infinite; }
-        .chat-typing span:nth-child(2) { animation-delay: 0.2s; }
-        .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes typingDot { 0%,60%,100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-5px); opacity: 1; } }
-
-        .chat-quick-pills { padding: 10px 20px; display: flex; gap: 8px; overflow-x: auto; border-top: 1px solid var(--border); }
-        .chat-quick-pills::-webkit-scrollbar { display: none; }
-        .quick-pill { white-space: nowrap; padding: 6px 13px; border-radius: 40px; background: var(--coral-pale); color: var(--coral); font-size: 12px; font-weight: 600; border: 1.5px solid rgba(255,107,74,0.2); cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
-        .quick-pill:hover { background: var(--coral); color: white; }
-
-        .chat-input-row { display: flex; gap: 8px; padding: 12px 16px; border-top: 1.5px solid var(--border); background: var(--white); }
-        .chat-input { flex: 1; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'Sora', sans-serif; font-size: 13.5px; color: var(--ink); background: var(--bg); outline: none; transition: border-color 0.2s; }
-        .chat-input:focus { border-color: var(--coral); background: white; }
-        .chat-input::placeholder { color: var(--muted); }
-        .chat-send-btn { width: 42px; height: 42px; border-radius: var(--radius-sm); background: var(--coral); border: none; color: white; font-size: 18px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .chat-send-btn:hover { background: #e85a3a; transform: scale(1.05); }
-        .chat-send-btn:disabled { background: var(--border); cursor: not-allowed; transform: none; }
-
-        /* ── LIVE VOICE AGENT ── */
-        .voice-zone { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); border: 1.5px solid var(--border); }
-
-        .voice-status-bar { padding: 14px 20px; background: var(--ink); display: flex; align-items: center; gap: 10px; }
-        .voice-status-indicator { width: 10px; height: 10px; border-radius: 50%; background: #555; transition: background 0.3s; flex-shrink: 0; }
-        .voice-status-indicator.idle { background: #555; }
-        .voice-status-indicator.listening { background: #FF6B4A; animation: livePulse 1s ease-in-out infinite; }
-        .voice-status-indicator.thinking { background: var(--amber); animation: livePulse 0.8s ease-in-out infinite; }
-        .voice-status-indicator.speaking { background: var(--mint); animation: livePulse 1.2s ease-in-out infinite; }
-        @keyframes livePulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.3); } }
-
-        .voice-status-text { font-size: 12.5px; font-weight: 600; color: #aaa; flex: 1; }
-        .voice-status-text.listening { color: #FF8A6E; }
-        .voice-status-text.thinking { color: var(--amber); }
-        .voice-status-text.speaking { color: var(--mint); }
-
-        .voice-end-btn { padding: 5px 12px; border-radius: 40px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #aaa; font-family: 'Sora', sans-serif; font-size: 11.5px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: none; }
-        .voice-end-btn:hover { background: rgba(255,107,74,0.2); color: #FF8A6E; border-color: rgba(255,107,74,0.3); }
-        .voice-end-btn.visible { display: block; }
-
-        .voice-transcript-feed { height: 220px; overflow-y: auto; padding: 18px 20px; background: #f8f8fc; display: flex; flex-direction: column; gap: 10px; }
-        .voice-transcript-feed::-webkit-scrollbar { width: 3px; }
-        .voice-transcript-feed::-webkit-scrollbar-thumb { background: var(--border); }
-
-        .voice-line { display: flex; gap: 8px; align-items: flex-start; animation: fadeSlide 0.2s ease; }
-        .voice-line.user { flex-direction: row-reverse; }
-        .voice-line-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 3px; flex-shrink: 0; width: 52px; }
-        .voice-line.user .voice-line-label { text-align: left; color: var(--coral); }
-        .voice-line.agent .voice-line-label { color: var(--mint); text-align: right; }
-        .voice-line-text { max-width: 80%; padding: 9px 13px; border-radius: 14px; font-size: 13.5px; line-height: 1.6; }
-        .voice-line.user .voice-line-text { background: var(--coral); color: white; border-bottom-right-radius: 3px; }
-        .voice-line.agent .voice-line-text { background: var(--white); border: 1.5px solid var(--border); color: var(--ink); border-bottom-left-radius: 3px; }
-
-        .voice-empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); font-size: 13.5px; text-align: center; gap: 8px; padding: 20px; }
-        .voice-empty-icon { font-size: 36px; margin-bottom: 4px; }
-
-        .voice-center { padding: 24px; background: var(--white); display: flex; flex-direction: column; align-items: center; gap: 14px; border-top: 1.5px solid var(--border); }
-
-        .mic-orbit { position: relative; width: 110px; height: 110px; display: flex; align-items: center; justify-content: center; }
-        .mic-orbit-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--coral); opacity: 0; transition: opacity 0.3s; }
-        .mic-orbit-ring.ring2 { inset: -12px; }
-        .mic-orbit-ring.ring3 { inset: -24px; }
-        .mic-orbit.active .mic-orbit-ring { opacity: 0.25; animation: orbitExpand 1.8s ease-in-out infinite; }
-        .mic-orbit.active .mic-orbit-ring.ring2 { animation-delay: 0.3s; }
-        .mic-orbit.active .mic-orbit-ring.ring3 { animation-delay: 0.6s; }
-        @keyframes orbitExpand { 0% { transform: scale(0.9); opacity: 0.3; } 50% { transform: scale(1.1); opacity: 0.1; } 100% { transform: scale(0.9); opacity: 0.3; } }
-
-        .live-mic-btn { width: 80px; height: 80px; border-radius: 50%; border: none; background: var(--coral); color: white; font-size: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; box-shadow: 0 8px 24px rgba(255,107,74,0.35); position: relative; z-index: 1; }
-        .live-mic-btn:hover { transform: scale(1.06); box-shadow: 0 12px 32px rgba(255,107,74,0.45); }
-        .live-mic-btn.listening { background: #e63946; box-shadow: 0 8px 24px rgba(230,57,70,0.45); }
-        .live-mic-btn.thinking { background: var(--amber); box-shadow: 0 8px 24px rgba(255,170,46,0.4); }
-        .live-mic-btn.speaking { background: var(--mint); box-shadow: 0 8px 24px rgba(46,207,176,0.4); }
-
-        .voice-start-text { font-size: 13px; color: var(--muted); font-weight: 600; text-align: center; }
-
-        .voice-suggestions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; padding: 0 8px; }
-        .voice-suggestion { padding: 6px 12px; border-radius: 40px; background: var(--bg); border: 1.5px solid var(--border); font-size: 11.5px; font-weight: 600; color: var(--ink-soft); cursor: pointer; transition: all 0.2s; }
-        .voice-suggestion:hover { background: var(--coral-pale); color: var(--coral); border-color: rgba(255,107,74,0.3); }
-
-        /* ── LIVE CALL GUARDIAN ── */
-        .call-zone {
-            background: var(--white);
-            border-radius: var(--radius);
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            border: 1.5px solid var(--border);
-        }
-
-        .call-hero {
-            background: linear-gradient(135deg, #1A1A2E, #2D1B3D);
-            padding: 32px 24px;
-            text-align: center;
-            color: white;
-        }
-
-        .call-hero-icon {
-            width: 80px; height: 80px;
-            background: rgba(255,255,255,0.08);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 36px;
-            margin: 0 auto 16px;
-            border: 2px solid rgba(255,255,255,0.15);
-        }
-
-        .call-hero h3 {
-            font-family: 'Nunito', sans-serif;
-            font-size: 22px;
-            font-weight: 900;
-            margin-bottom: 8px;
-            color: white;
-        }
-
-        .call-hero p {
-            font-size: 13px;
-            color: rgba(255,255,255,0.6);
-            line-height: 1.6;
-            max-width: 360px;
-            margin: 0 auto 20px;
-        }
-
-        .live-call-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            border-radius: 40px;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.12);
-            font-size: 13px;
-            font-weight: 600;
-            color: rgba(255,255,255,0.5);
-        }
-
-        .live-call-status.monitoring {
-            background: rgba(46,207,176,0.15);
-            border-color: rgba(46,207,176,0.3);
-            color: var(--mint);
-        }
-
-        .live-call-status.alert {
-            background: rgba(255,107,74,0.15);
-            border-color: rgba(255,107,74,0.3);
-            color: #FF8A6E;
-        }
-
-        .call-status-dot {
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            background: currentColor;
-            flex-shrink: 0;
-        }
-
-        .monitoring .call-status-dot { animation: livePulse 1s infinite; }
-
-        .call-features {
-            padding: 20px 24px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            border-bottom: 1.5px solid var(--border);
-        }
-
-        .call-feature-card {
-            background: var(--bg);
-            border-radius: var(--radius-sm);
-            padding: 14px;
-            border: 1.5px solid var(--border);
-        }
-
-        .call-feature-icon { font-size: 22px; margin-bottom: 8px; }
-        .call-feature-title { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
-        .call-feature-desc { font-size: 11.5px; color: var(--muted); line-height: 1.5; }
-
-        .call-alerts-feed {
-            padding: 16px 24px;
-            min-height: 120px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .call-alerts-label {
-            font-size: 10.5px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--muted);
-            margin-bottom: 4px;
-        }
-
-        .call-alert-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            padding: 12px 14px;
-            border-radius: var(--radius-sm);
-            animation: fadeSlide 0.3s ease;
-        }
-
-        .call-alert-item.warning { background: var(--warn-bg); border: 1px solid rgba(255,170,46,0.3); }
-        .call-alert-item.danger { background: var(--danger-bg); border: 1px solid rgba(192,32,15,0.2); }
-        .call-alert-item.safe { background: var(--safe-bg); border: 1px solid rgba(46,207,176,0.3); }
-
-        .call-alert-emoji { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
-        .call-alert-text { font-size: 12.5px; font-weight: 600; line-height: 1.5; }
-        .call-alert-item.warning .call-alert-text { color: var(--warn-text); }
-        .call-alert-item.danger .call-alert-text { color: var(--danger-text); }
-        .call-alert-item.safe .call-alert-text { color: var(--safe-text); }
-
-        .call-no-alerts {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px;
-            color: var(--muted);
-            font-size: 13px;
-            gap: 8px;
-        }
-
-        .call-controls {
-            padding: 16px 24px 20px;
-            display: flex;
-            gap: 10px;
-            border-top: 1.5px solid var(--border);
-        }
-
-        .call-btn {
-            flex: 1;
-            padding: 13px;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-family: 'Sora', sans-serif;
-            font-size: 13.5px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .call-btn.start {
-            background: linear-gradient(135deg, #e63946, #c1121f);
-            color: white;
-            box-shadow: 0 4px 16px rgba(230,57,70,0.3);
-        }
-
-        .call-btn.start:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(230,57,70,0.4); }
-
-        .call-btn.stop {
-            background: var(--bg);
-            color: var(--ink-soft);
-            border: 1.5px solid var(--border);
-        }
-
-        .call-btn.stop:hover { background: var(--border); }
-
-        .call-input-zone {
-            padding: 0 24px 20px;
-        }
-
-        .call-input-label {
-            font-size: 11.5px;
-            font-weight: 600;
-            color: var(--muted);
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .call-transcript-input {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-family: 'Sora', sans-serif;
-            font-size: 13px;
-            color: var(--ink);
-            background: var(--bg);
-            outline: none;
-            resize: none;
-            min-height: 80px;
-            transition: border-color 0.2s;
-        }
-
-        .call-transcript-input:focus { border-color: var(--coral); background: white; }
-        .call-transcript-input::placeholder { color: var(--muted); }
-
-        .call-analyze-btn {
-            width: 100%;
-            padding: 13px;
-            margin-top: 10px;
-            background: var(--ink);
-            color: white;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-family: 'Sora', sans-serif;
-            font-size: 13.5px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .call-analyze-btn:hover { background: #2d2d4a; transform: translateY(-1px); }
-
-        /* ── FOOTER ── */
-        footer { text-align: center; padding: 28px 20px; color: var(--muted); font-size: 12px; line-height: 1.8; }
-        footer a { color: var(--coral); text-decoration: none; font-weight: 600; }
-
-        @media (max-width: 520px) {
-            .hero h2 { font-size: 28px; }
-            .brand { font-size: 24px; }
-            .tabs { grid-template-columns: repeat(2, 1fr); }
-            .call-features { grid-template-columns: 1fr; }
-            .result-body, .voice-center { padding: 20px 16px; }
-            .verdict-header { padding: 24px 16px 18px; }
-            header { padding: 12px 16px; }
-        }
-
-            #bgCanvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
-        header, .container, footer {
-            position: relative;
-            z-index: 1;
-        }
-        body { background: #e8f4fd; }
-            .header-tips {
+        .header-tips {
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
@@ -766,25 +96,276 @@
             white-space: nowrap;
             transition: opacity 0.5s ease;
         }
-        @media (max-width: 768px) {
-            .header-tips { display: none; }
+
+        .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); font-weight: 600; }
+        .gemini-badge { background: linear-gradient(135deg, #4285F4, #EA4335, #FBBC04, #34A853); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; font-size: 13px; }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px 80px; }
+
+        .hero { text-align: center; padding: 44px 0 28px; position: relative; z-index: 2; }
+        .hero-eyebrow { display: inline-flex; align-items: center; gap: 6px; background: var(--coral-pale); color: var(--coral); font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 40px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .hero h2 { font-size: 40px; font-weight: 900; line-height: 1.15; color: var(--ink); margin-bottom: 12px; letter-spacing: -1px; }
+        .hero h2 .highlight { color: var(--coral); position: relative; display: inline-block; }
+        .hero h2 .highlight::after { content: ''; position: absolute; bottom: 2px; left: 0; right: 0; height: 4px; background: var(--amber); border-radius: 4px; opacity: 0.5; }
+        .hero p { color: var(--ink-soft); font-size: 15px; max-width: 520px; margin: 0 auto 28px; line-height: 1.7; }
+
+        /* 6-card feature grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 28px;
+            width: 100%;
         }
+
+        .feature-card {
+            background: white;
+            border-radius: 16px;
+            padding: 22px 18px;
+            border: 1.5px solid var(--border);
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(26,26,46,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .feature-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(26,26,46,0.10); }
+        .feature-card-icon { font-size: 30px; margin-bottom: 10px; }
+        .feature-card-title { font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px; }
+        .feature-card-desc { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+        /* TABS */
+        .tabs { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--white); border-radius: var(--radius); padding: 6px; margin-bottom: 20px; box-shadow: var(--shadow); gap: 4px; border: 1.5px solid var(--border); }
+        .tab { padding: 11px 8px; border: none; background: transparent; border-radius: var(--radius-sm); font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--muted); transition: all 0.25s ease; display: flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; }
+        .tab:hover:not(.active) { background: var(--bg); color: var(--ink-soft); }
+        .tab.active { background: var(--coral); color: var(--white); box-shadow: 0 4px 14px rgba(255,107,74,0.35); }
+        .tab.call-tab.active { background: linear-gradient(135deg, #e63946, #c1121f); box-shadow: 0 4px 14px rgba(230,57,70,0.4); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeSlide 0.25s ease; }
+        @keyframes fadeSlide { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* UPLOAD */
+        .upload-zone { padding: 52px 32px; text-align: center; cursor: pointer; transition: all 0.25s ease; border: 2.5px dashed var(--border); border-radius: var(--radius); background: var(--white); }
+        .upload-zone:hover, .upload-zone.dragover { border-color: var(--coral); background: var(--coral-pale); transform: scale(1.005); }
+        .upload-icon { width: 68px; height: 68px; background: var(--coral-pale); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 16px; transition: transform 0.25s; }
+        .upload-zone:hover .upload-icon { transform: scale(1.1) rotate(-5deg); }
+        .upload-zone h3 { font-size: 18px; font-weight: 800; color: var(--ink); margin-bottom: 6px; }
+        .upload-zone p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+        .upload-hint { display: inline-block; margin-top: 12px; background: var(--coral-pale); color: var(--coral); font-size: 11.5px; font-weight: 600; padding: 4px 12px; border-radius: 40px; }
+        #fileInput { display: none; }
+        .preview { display: none; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); border: 1.5px solid var(--border); background: var(--white); }
+        .preview img { width: 100%; max-height: 340px; object-fit: contain; display: block; background: #f8f8fb; }
+        .preview-bar { padding: 11px 18px; background: var(--white); display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); }
+        .preview-name { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); }
+        .preview-change { font-size: 12px; color: var(--coral); font-weight: 600; cursor: pointer; border: none; background: none; font-family: 'Sora', sans-serif; }
+        .analyze-btn { width: 100%; padding: 16px; background: var(--coral); border: none; border-radius: var(--radius-sm); color: var(--white); font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 800; cursor: pointer; transition: all 0.2s; display: none; margin-top: 14px; box-shadow: 0 6px 20px rgba(255,107,74,0.35); }
+        .analyze-btn:hover { background: #e85a3a; transform: translateY(-2px); }
+
+        /* CAMERA */
+        .camera-zone { border-radius: var(--radius); overflow: hidden; border: 1.5px solid var(--border); background: var(--white); box-shadow: var(--shadow); }
+        #cameraFeed { width: 100%; max-height: 360px; object-fit: cover; background: var(--ink); display: block; }
+        .camera-controls { padding: 14px 18px; display: flex; gap: 10px; justify-content: center; }
+        .cam-btn { padding: 11px 20px; border: none; border-radius: var(--radius-sm); font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .cam-btn.primary { background: var(--coral); color: white; }
+        .cam-btn.primary:hover { background: #e85a3a; transform: translateY(-1px); }
+        .cam-btn.secondary { background: var(--bg); color: var(--ink-soft); border: 1.5px solid var(--border); }
+
+        /* LOADING */
+        .loading { display: none; text-align: center; padding: 48px 32px; background: var(--white); border-radius: var(--radius); margin-top: 16px; box-shadow: var(--shadow); border: 1.5px solid var(--border); }
+        .loader-eye { width: 56px; height: 56px; margin: 0 auto 18px; position: relative; }
+        .loader-eye-outer { width: 56px; height: 56px; border: 3px solid var(--coral-pale); border-top-color: var(--coral); border-radius: 50%; animation: spin 0.9s linear infinite; }
+        .loader-eye-inner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 20px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading h4 { font-size: 17px; font-weight: 800; color: var(--ink); margin-bottom: 6px; }
+        .loading p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+        .loading-dots { display: flex; justify-content: center; gap: 6px; margin-top: 14px; }
+        .loading-dots span { width: 7px; height: 7px; border-radius: 50%; background: var(--coral); opacity: 0.3; animation: dotBounce 1.2s ease-in-out infinite; }
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes dotBounce { 0%,80%,100% { opacity:0.3; transform:translateY(0); } 40% { opacity:1; transform:translateY(-5px); } }
+
+        /* RESULT */
+        .result { display: none; border-radius: var(--radius); overflow: hidden; margin-top: 16px; box-shadow: var(--shadow-lg); border: 1.5px solid var(--border); animation: fadeSlide 0.3s ease; }
+        .verdict-header { padding: 32px 28px 24px; text-align: center; }
+        .verdict-header.SAFE { background: linear-gradient(160deg, #E8FAF4, #F0FDF9); }
+        .verdict-header.SUSPICIOUS { background: linear-gradient(160deg, #FFF8EC, #FFF5DC); }
+        .verdict-header.SCAM { background: linear-gradient(160deg, #FFF0EE, #FFE8E5); }
+        .verdict-icon { width: 76px; height: 76px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 12px; }
+        .verdict-icon.SAFE { background: var(--safe-bg); }
+        .verdict-icon.SUSPICIOUS { background: var(--warn-bg); }
+        .verdict-icon.SCAM { background: var(--danger-bg); }
+        .verdict-tag { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 5px; }
+        .verdict-tag.SAFE { color: var(--safe-text); }
+        .verdict-tag.SUSPICIOUS { color: var(--warn-text); }
+        .verdict-tag.SCAM { color: var(--danger-text); }
+        .verdict-title { font-size: 26px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 8px; }
+        .verdict-title.SAFE { color: var(--safe-text); }
+        .verdict-title.SUSPICIOUS { color: var(--warn-text); }
+        .verdict-title.SCAM { color: var(--danger-text); }
+        .confidence-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 40px; background: rgba(255,255,255,0.8); font-size: 11.5px; font-weight: 600; color: var(--ink-soft); border: 1px solid rgba(0,0,0,0.06); }
+        .speak-verdict-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; background: rgba(255,255,255,0.7); border: 1.5px solid rgba(0,0,0,0.08); border-radius: 40px; padding: 6px 16px; font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 600; color: var(--ink-soft); cursor: pointer; transition: all 0.2s; }
+        .speak-verdict-btn:hover { background: white; border-color: var(--coral); color: var(--coral); }
+        .speak-verdict-btn.speaking { background: var(--coral-pale); border-color: var(--coral); color: var(--coral); }
+        .result-body { background: var(--white); padding: 26px 28px; }
+        .result-section { margin-bottom: 22px; }
+        .result-section:last-child { margin-bottom: 0; }
+        .section-label { display: flex; align-items: center; gap: 8px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 9px; }
+        .section-label .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--coral); }
+        .result-section p { font-size: 14px; line-height: 1.75; color: var(--ink-soft); }
+        .action-card { border-radius: var(--radius-sm); padding: 14px 18px; font-size: 14px; font-weight: 500; line-height: 1.7; border-left: 4px solid; }
+        .action-card.SAFE { background: var(--safe-bg); color: var(--safe-text); border-left-color: var(--mint); }
+        .action-card.SUSPICIOUS { background: var(--warn-bg); color: var(--warn-text); border-left-color: var(--amber); }
+        .action-card.SCAM { background: var(--danger-bg); color: var(--danger-text); border-left-color: var(--coral); }
+        .flags-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+        .flag-chip { display: inline-flex; align-items: flex-start; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 400; background: #FFF8F7; color: var(--ink-soft); border: 1px solid #FFCCC7; line-height: 1.5; width: 100%; }
+        .flag-keyword { color: #C0200F; font-weight: 700; white-space: nowrap; }
+        .divider { height: 1.5px; background: var(--border); margin: 20px 0; }
+        .scan-again-btn { width: 100%; padding: 13px; background: var(--bg); border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'Sora', sans-serif; color: var(--ink-soft); font-size: 13.5px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .scan-again-btn:hover { background: var(--border); color: var(--ink); }
+
+        /* CHAT */
+        .chat-panel { display: none; margin-top: 16px; background: var(--white); border-radius: var(--radius); border: 1.5px solid var(--border); box-shadow: var(--shadow); overflow: hidden; animation: fadeSlide 0.3s ease; }
+        .chat-panel-header { padding: 16px 20px; border-bottom: 1.5px solid var(--border); display: flex; align-items: center; gap: 10px; background: linear-gradient(135deg, var(--coral-pale), var(--amber-pale)); }
+        .chat-panel-avatar { width: 36px; height: 36px; background: var(--coral); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .chat-panel-info h4 { font-size: 15px; font-weight: 800; color: var(--ink); margin-bottom: 1px; }
+        .chat-panel-info p { font-size: 11.5px; color: var(--muted); font-weight: 600; }
+        .chat-online-dot { width: 8px; height: 8px; background: var(--mint); border-radius: 50%; margin-left: auto; animation: onlinePulse 2s ease-in-out infinite; }
+        @keyframes onlinePulse { 0%,100% { box-shadow: 0 0 0 2px rgba(46,207,176,0.25); } 50% { box-shadow: 0 0 0 5px rgba(46,207,176,0.1); } }
+        .chat-messages { height: 280px; overflow-y: auto; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+        .chat-messages::-webkit-scrollbar { width: 4px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+        .chat-msg { display: flex; gap: 9px; align-items: flex-end; animation: fadeSlide 0.2s ease; }
+        .chat-msg.user { flex-direction: row-reverse; }
+        .chat-msg-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+        .chat-msg.agent .chat-msg-avatar { background: var(--coral-pale); }
+        .chat-msg.user .chat-msg-avatar { background: var(--sky); color: white; font-size: 11px; font-weight: 700; }
+        .chat-bubble { max-width: 78%; padding: 10px 14px; border-radius: 16px; font-size: 13.5px; line-height: 1.65; }
+        .chat-msg.agent .chat-bubble { background: var(--bg); border: 1.5px solid var(--border); color: var(--ink); border-bottom-left-radius: 4px; }
+        .chat-msg.user .chat-bubble { background: var(--coral); color: white; border-bottom-right-radius: 4px; }
+        .chat-typing { display: flex; align-items: center; gap: 4px; padding: 10px 14px; background: var(--bg); border: 1.5px solid var(--border); border-radius: 16px; border-bottom-left-radius: 4px; width: fit-content; }
+        .chat-typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: typingDot 1.2s ease-in-out infinite; }
+        .chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+        .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typingDot { 0%,60%,100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-5px); opacity: 1; } }
+        .chat-quick-pills { padding: 10px 20px; display: flex; gap: 8px; overflow-x: auto; border-top: 1px solid var(--border); }
+        .chat-quick-pills::-webkit-scrollbar { display: none; }
+        .quick-pill { white-space: nowrap; padding: 6px 13px; border-radius: 40px; background: var(--coral-pale); color: var(--coral); font-size: 12px; font-weight: 600; border: 1.5px solid rgba(255,107,74,0.2); cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
+        .quick-pill:hover { background: var(--coral); color: white; }
+        .chat-input-row { display: flex; gap: 8px; padding: 12px 16px; border-top: 1.5px solid var(--border); background: var(--white); }
+        .chat-input { flex: 1; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'Sora', sans-serif; font-size: 13.5px; color: var(--ink); background: var(--bg); outline: none; transition: border-color 0.2s; }
+        .chat-input:focus { border-color: var(--coral); background: white; }
+        .chat-input::placeholder { color: var(--muted); }
+        .chat-send-btn { width: 42px; height: 42px; border-radius: var(--radius-sm); background: var(--coral); border: none; color: white; font-size: 18px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .chat-send-btn:hover { background: #e85a3a; transform: scale(1.05); }
+        .chat-send-btn:disabled { background: var(--border); cursor: not-allowed; transform: none; }
+
+        /* VOICE AGENT */
+        .voice-zone { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); border: 1.5px solid var(--border); }
+        .voice-status-bar { padding: 14px 20px; background: var(--ink); display: flex; align-items: center; gap: 10px; }
+        .voice-status-indicator { width: 10px; height: 10px; border-radius: 50%; background: #555; transition: background 0.3s; flex-shrink: 0; }
+        .voice-status-indicator.listening { background: #FF6B4A; animation: livePulse 1s ease-in-out infinite; }
+        .voice-status-indicator.thinking { background: var(--amber); animation: livePulse 0.8s ease-in-out infinite; }
+        .voice-status-indicator.speaking { background: var(--mint); animation: livePulse 1.2s ease-in-out infinite; }
+        @keyframes livePulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.3); } }
+        .voice-status-text { font-size: 12.5px; font-weight: 600; color: #aaa; flex: 1; }
+        .voice-status-text.listening { color: #FF8A6E; }
+        .voice-status-text.thinking { color: var(--amber); }
+        .voice-status-text.speaking { color: var(--mint); }
+        .voice-end-btn { padding: 5px 12px; border-radius: 40px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #aaa; font-family: 'Sora', sans-serif; font-size: 11.5px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: none; }
+        .voice-end-btn:hover { background: rgba(255,107,74,0.2); color: #FF8A6E; border-color: rgba(255,107,74,0.3); }
+        .voice-end-btn.visible { display: block; }
+        .voice-transcript-feed { height: 220px; overflow-y: auto; padding: 18px 20px; background: #f8f8fc; display: flex; flex-direction: column; gap: 10px; }
+        .voice-transcript-feed::-webkit-scrollbar { width: 3px; }
+        .voice-transcript-feed::-webkit-scrollbar-thumb { background: var(--border); }
+        .voice-line { display: flex; gap: 8px; align-items: flex-start; animation: fadeSlide 0.2s ease; }
+        .voice-line.user { flex-direction: row-reverse; }
+        .voice-line-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 3px; flex-shrink: 0; width: 52px; }
+        .voice-line.user .voice-line-label { text-align: left; color: var(--coral); }
+        .voice-line.agent .voice-line-label { color: var(--mint); text-align: right; }
+        .voice-line-text { max-width: 80%; padding: 9px 13px; border-radius: 14px; font-size: 13.5px; line-height: 1.6; }
+        .voice-line.user .voice-line-text { background: var(--coral); color: white; border-bottom-right-radius: 3px; }
+        .voice-line.agent .voice-line-text { background: var(--white); border: 1.5px solid var(--border); color: var(--ink); border-bottom-left-radius: 3px; }
+        .voice-empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); font-size: 13.5px; text-align: center; gap: 8px; padding: 20px; }
+        .voice-empty-icon { font-size: 36px; margin-bottom: 4px; }
+        .voice-center { padding: 24px; background: var(--white); display: flex; flex-direction: column; align-items: center; gap: 14px; border-top: 1.5px solid var(--border); }
+        .mic-orbit { position: relative; width: 110px; height: 110px; display: flex; align-items: center; justify-content: center; }
+        .mic-orbit-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--coral); opacity: 0; transition: opacity 0.3s; }
+        .mic-orbit-ring.ring2 { inset: -12px; }
+        .mic-orbit-ring.ring3 { inset: -24px; }
+        .mic-orbit.active .mic-orbit-ring { opacity: 0.25; animation: orbitExpand 1.8s ease-in-out infinite; }
+        .mic-orbit.active .mic-orbit-ring.ring2 { animation-delay: 0.3s; }
+        .mic-orbit.active .mic-orbit-ring.ring3 { animation-delay: 0.6s; }
+        @keyframes orbitExpand { 0% { transform: scale(0.9); opacity: 0.3; } 50% { transform: scale(1.1); opacity: 0.1; } 100% { transform: scale(0.9); opacity: 0.3; } }
+        .live-mic-btn { width: 80px; height: 80px; border-radius: 50%; border: none; background: var(--coral); color: white; font-size: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; box-shadow: 0 8px 24px rgba(255,107,74,0.35); position: relative; z-index: 1; }
+        .live-mic-btn:hover { transform: scale(1.06); }
+        .live-mic-btn.listening { background: #e63946; }
+        .live-mic-btn.thinking { background: var(--amber); }
+        .live-mic-btn.speaking { background: var(--mint); }
+        .voice-start-text { font-size: 13px; color: var(--muted); font-weight: 600; text-align: center; }
+        .voice-suggestions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; padding: 0 8px; }
+        .voice-suggestion { padding: 6px 12px; border-radius: 40px; background: var(--bg); border: 1.5px solid var(--border); font-size: 11.5px; font-weight: 600; color: var(--ink-soft); cursor: pointer; transition: all 0.2s; }
+        .voice-suggestion:hover { background: var(--coral-pale); color: var(--coral); border-color: rgba(255,107,74,0.3); }
+
+        /* CALL GUARDIAN */
+        .call-zone { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); border: 1.5px solid var(--border); }
+        .call-hero { background: linear-gradient(135deg, #1A1A2E, #2D1B3D); padding: 32px 24px; text-align: center; color: white; }
+        .call-hero-icon { width: 80px; height: 80px; background: rgba(255,255,255,0.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 16px; border: 2px solid rgba(255,255,255,0.15); }
+        .call-hero h3 { font-size: 22px; font-weight: 900; margin-bottom: 8px; color: white; }
+        .call-hero p { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.6; max-width: 360px; margin: 0 auto 20px; }
+        .live-call-status { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 40px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.5); }
+        .live-call-status.monitoring { background: rgba(46,207,176,0.15); border-color: rgba(46,207,176,0.3); color: var(--mint); }
+        .call-status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+        .monitoring .call-status-dot { animation: livePulse 1s infinite; }
+        .call-features { padding: 20px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border-bottom: 1.5px solid var(--border); }
+        .call-feature-card { background: var(--bg); border-radius: var(--radius-sm); padding: 14px; border: 1.5px solid var(--border); }
+        .call-feature-icon { font-size: 22px; margin-bottom: 8px; }
+        .call-feature-title { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+        .call-feature-desc { font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+        .call-alerts-feed { padding: 16px 24px; min-height: 120px; display: flex; flex-direction: column; gap: 10px; }
+        .call-alerts-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 4px; }
+        .call-alert-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: var(--radius-sm); animation: fadeSlide 0.3s ease; }
+        .call-alert-item.warning { background: var(--warn-bg); border: 1px solid rgba(255,170,46,0.3); }
+        .call-alert-item.danger { background: var(--danger-bg); border: 1px solid rgba(192,32,15,0.2); }
+        .call-alert-item.safe { background: var(--safe-bg); border: 1px solid rgba(46,207,176,0.3); }
+        .call-alert-emoji { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+        .call-alert-text { font-size: 12.5px; font-weight: 600; line-height: 1.5; }
+        .call-alert-item.warning .call-alert-text { color: var(--warn-text); }
+        .call-alert-item.danger .call-alert-text { color: var(--danger-text); }
+        .call-alert-item.safe .call-alert-text { color: var(--safe-text); }
+        .call-no-alerts { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; color: var(--muted); font-size: 13px; gap: 8px; }
+        .call-controls { padding: 16px 24px 20px; display: flex; gap: 10px; border-top: 1.5px solid var(--border); }
+        .call-btn { flex: 1; padding: 13px; border: none; border-radius: var(--radius-sm); font-family: 'Sora', sans-serif; font-size: 13.5px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .call-btn.start { background: linear-gradient(135deg, #e63946, #c1121f); color: white; box-shadow: 0 4px 16px rgba(230,57,70,0.3); }
+        .call-btn.start:hover { transform: translateY(-2px); }
+        .call-btn.stop { background: var(--bg); color: var(--ink-soft); border: 1.5px solid var(--border); }
+        .call-input-zone { padding: 0 24px 20px; }
+        .call-input-label { font-size: 11.5px; font-weight: 600; color: var(--muted); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .call-transcript-input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'Sora', sans-serif; font-size: 13px; color: var(--ink); background: var(--bg); outline: none; resize: none; min-height: 80px; transition: border-color 0.2s; }
+        .call-transcript-input:focus { border-color: var(--coral); background: white; }
+        .call-transcript-input::placeholder { color: var(--muted); }
+        .call-analyze-btn { width: 100%; padding: 13px; margin-top: 10px; background: var(--ink); color: white; border: none; border-radius: var(--radius-sm); font-family: 'Sora', sans-serif; font-size: 13.5px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .call-analyze-btn:hover { background: #2d2d4a; transform: translateY(-1px); }
+
+        footer { text-align: center; padding: 28px 20px; color: var(--muted); font-size: 12px; line-height: 1.8; }
+        footer a { color: var(--coral); text-decoration: none; font-weight: 600; }
+
+        @media (max-width: 768px) { .header-tips { display: none; } .feature-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 520px) { .hero h2 { font-size: 28px; } .brand { font-size: 24px; } .tabs { grid-template-columns: repeat(2, 1fr); } .call-features { grid-template-columns: 1fr; } .feature-grid { grid-template-columns: 1fr; } header { padding: 12px 16px; } }
     </style>
 </head>
 <body>
 <canvas id="bgCanvas"></canvas>
+<div id="ov"></div>
 
 <header>
     <div class="logo-wrap">
-        <img src="/static/logo.png" class="logo-svg" alt="Phish Eye" style="width:100px;height:100px;object-fit:contain;">
-
+        <img src="/static/logo.png" class="logo-svg" alt="Phish Eye">
         <div>
             <div class="brand">Phish <span>Eye</span></div>
             <div class="brand-sub">AI Scam Guardian</div>
         </div>
     </div>
     <div class="header-tips" id="headerTip">
-        <span id="tipText">💡 Tip: The IRS will never call you and demand gift card payments</span>
+        <span id="tipText">💡 The IRS will never call you and demand gift card payments</span>
     </div>
     <div class="header-right">
         <span class="gemini-badge">✦ Gemini AI</span>
@@ -794,20 +375,47 @@
 </header>
 
 <div class="container">
-
     <div class="hero">
         <div class="hero-eyebrow">✦ AI-Powered Scam Detection</div>
         <h2>Stay Safe from <span class="highlight">Scams</span><br>in Seconds</h2>
-        <p>Got a suspicious message, email, or call? Let PhishEye check it instantly — no tech knowledge needed.</p>
-        <div class="trust-row">
-            <div class="trust-pill">🔒 Private & Secure</div>
-            <div class="trust-pill">⚡ Instant Results</div>
-            <div class="trust-pill">🌍 Free to Use</div>
-            <div class="trust-pill">🤖 Gemini AI</div>
+        <p>Got a suspicious message, email, or call? Let Phish Eye check it instantly — your AI second opinion, before it's too late.</p>
+    </div>
+
+    <!-- 6-card feature grid -->
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="feature-card-icon">📸</div>
+            <div class="feature-card-title">Visual Scanner</div>
+            <div class="feature-card-desc">Upload or photograph any suspicious email, text, or message for instant AI analysis</div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-card-icon">📞</div>
+            <div class="feature-card-title">Call Guardian</div>
+            <div class="feature-card-desc">On a suspicious call? Type what they're saying — detects IRS scams, gift card demands, and impersonation in real time</div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-card-icon">🎙️</div>
+            <div class="feature-card-title">Voice Agent</div>
+            <div class="feature-card-desc">Talk to our live AI agent by voice and get instant spoken advice — like a cybersecurity expert on speed dial</div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-card-icon">🔒</div>
+            <div class="feature-card-title">Private & Secure</div>
+            <div class="feature-card-desc">Your data is never stored or shared. Every scan happens in real-time and is deleted immediately after</div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-card-icon">🌍</div>
+            <div class="feature-card-title">Free to Use</div>
+            <div class="feature-card-desc">No account needed, no hidden fees, no limits. Free forever for everyone</div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-card-icon">⚡</div>
+            <div class="feature-card-title">Powered by Gemini</div>
+            <div class="feature-card-desc">Built on Google Gemini AI and the Agent Development Kit, backed by verified FTC & FBI scam data</div>
         </div>
     </div>
 
-    <!-- ── TABS ── -->
+    <!-- TABS -->
     <div class="tabs">
         <button class="tab active" onclick="switchTab('upload')">📁 Upload</button>
         <button class="tab" onclick="switchTab('camera')">📸 Camera</button>
@@ -815,7 +423,7 @@
         <button class="tab call-tab" onclick="switchTab('call')">📞 Call Guard</button>
     </div>
 
-    <!-- ── UPLOAD TAB ── -->
+    <!-- UPLOAD TAB -->
     <div class="tab-content active" id="tab-upload">
         <div class="upload-zone" id="uploadZone">
             <div class="upload-icon">📩</div>
@@ -834,7 +442,7 @@
         <button class="analyze-btn" id="analyzeBtn" onclick="analyzeImage()">🔍 Check This for Scams</button>
     </div>
 
-    <!-- ── CAMERA TAB ── -->
+    <!-- CAMERA TAB -->
     <div class="tab-content" id="tab-camera">
         <div class="camera-zone">
             <video id="cameraFeed" autoplay playsinline></video>
@@ -847,12 +455,12 @@
         <canvas id="captureCanvas" style="display:none"></canvas>
     </div>
 
-    <!-- ── LIVE VOICE AGENT TAB ── -->
+    <!-- VOICE AGENT TAB -->
     <div class="tab-content" id="tab-voice">
         <div class="voice-zone">
             <div class="voice-status-bar">
                 <div class="voice-status-indicator idle" id="voiceIndicator"></div>
-                <div class="voice-status-text idle" id="voiceStatusText">PhishEye Live Agent • Ready</div>
+                <div class="voice-status-text idle" id="voiceStatusText">Phish Eye Live Agent • Ready</div>
                 <button class="voice-end-btn" id="voiceEndBtn" onclick="endLiveSession()">End session</button>
             </div>
             <div class="voice-transcript-feed" id="voiceFeed">
@@ -880,46 +488,24 @@
         </div>
     </div>
 
-    <!-- ── LIVE CALL GUARDIAN TAB ── -->
+    <!-- CALL GUARD TAB -->
     <div class="tab-content" id="tab-call">
         <div class="call-zone">
-
-            <!-- Hero section -->
             <div class="call-hero">
                 <div class="call-hero-icon">📞</div>
                 <h3>Live Call Guardian</h3>
-                <p>Getting a suspicious call? Type what the caller is saying and PhishEye will analyze it in real time — detecting scam patterns, urgency tactics, and AI voice cloning signals.</p>
+                <p>Getting a suspicious call? Type what the caller is saying and Phish Eye will analyze it in real time — detecting scam patterns, urgency tactics, and AI voice cloning signals.</p>
                 <div class="live-call-status" id="callStatus">
                     <div class="call-status-dot"></div>
                     <span id="callStatusText">Not monitoring</span>
                 </div>
             </div>
-
-            <!-- Feature cards -->
             <div class="call-features">
-                <div class="call-feature-card">
-                    <div class="call-feature-icon">🤖</div>
-                    <div class="call-feature-title">AI Voice Detection</div>
-                    <div class="call-feature-desc">Flags unnatural speech patterns that may indicate AI voice cloning</div>
-                </div>
-                <div class="call-feature-card">
-                    <div class="call-feature-icon">⚡</div>
-                    <div class="call-feature-title">Urgency Detection</div>
-                    <div class="call-feature-desc">Catches "act now", "don't hang up", and pressure tactics instantly</div>
-                </div>
-                <div class="call-feature-card">
-                    <div class="call-feature-icon">👨‍👩‍👧</div>
-                    <div class="call-feature-title">AI Voice Cloning</div>
-                    <div class="call-feature-desc">Detects when scammers clone a family member or friend's voice to fake emergencies</div>
-                </div>
-                <div class="call-feature-card">
-                    <div class="call-feature-icon">🏦</div>
-                    <div class="call-feature-title">Impersonation Alert</div>
-                    <div class="call-feature-desc">Identifies callers pretending to be banks, IRS, or government</div>
-                </div>
+                <div class="call-feature-card"><div class="call-feature-icon">🤖</div><div class="call-feature-title">AI Voice Detection</div><div class="call-feature-desc">Flags unnatural speech patterns that may indicate AI voice cloning</div></div>
+                <div class="call-feature-card"><div class="call-feature-icon">⚡</div><div class="call-feature-title">Urgency Detection</div><div class="call-feature-desc">Catches "act now", "don't hang up", and pressure tactics instantly</div></div>
+                <div class="call-feature-card"><div class="call-feature-icon">👨‍👩‍👧</div><div class="call-feature-title">AI Voice Cloning</div><div class="call-feature-desc">Detects when scammers clone a family member's voice to fake emergencies</div></div>
+                <div class="call-feature-card"><div class="call-feature-icon">🏦</div><div class="call-feature-title">Impersonation Alert</div><div class="call-feature-desc">Identifies callers pretending to be banks, IRS, or government</div></div>
             </div>
-
-            <!-- Live alerts feed -->
             <div class="call-alerts-feed" id="callAlertsFeed">
                 <div class="call-alerts-label">Live Alerts</div>
                 <div class="call-no-alerts" id="callNoAlerts">
@@ -927,46 +513,27 @@
                     <span>No active call. Start monitoring or type what the caller is saying below.</span>
                 </div>
             </div>
-
-            <!-- Text input for caller transcript -->
             <div class="call-input-zone">
-                <div class="call-input-label">
-                    ✍️ Type what the caller is saying:
-                </div>
-                <textarea
-                    class="call-transcript-input"
-                    id="callTranscript"
-                    placeholder="e.g. 'Hi, this is the IRS. Your account has been compromised and you need to pay $500 in gift cards immediately or you will be arrested...'"
-                ></textarea>
-                <button class="call-analyze-btn" onclick="analyzeCallTranscript()">
-                    🔍 Analyze This Call
-                </button>
+                <div class="call-input-label">✍️ Type what the caller is saying:</div>
+                <textarea class="call-transcript-input" id="callTranscript" placeholder="e.g. 'Hi, this is the IRS. Your account has been compromised and you need to pay $500 in gift cards immediately or you will be arrested...'"></textarea>
+                <button class="call-analyze-btn" onclick="analyzeCallTranscript()">🔍 Analyze This Call</button>
             </div>
-
-            <!-- Controls -->
             <div class="call-controls">
-                <button class="call-btn start" id="startCallBtn" onclick="startCallMonitor()">
-                    🔴 Start Live Monitoring
-                </button>
-                <button class="call-btn stop" id="stopCallBtn" onclick="stopCallMonitor()" style="display:none">
-                    ⏹ Stop Monitoring
-                </button>
+                <button class="call-btn start" id="startCallBtn" onclick="startCallMonitor()">🔴 Start Live Monitoring</button>
+                <button class="call-btn stop" id="stopCallBtn" onclick="stopCallMonitor()" style="display:none">⏹ Stop Monitoring</button>
             </div>
         </div>
     </div>
 
-    <!-- ── LOADING ── -->
+    <!-- LOADING -->
     <div class="loading" id="loading">
-        <div class="loader-eye">
-            <div class="loader-eye-outer"></div>
-            <div class="loader-eye-inner">👁️</div>
-        </div>
+        <div class="loader-eye"><div class="loader-eye-outer"></div><div class="loader-eye-inner">👁️</div></div>
         <h4>Analyzing your image…</h4>
         <p>Checking for fake urgency, suspicious links, impersonation & more</p>
         <div class="loading-dots"><span></span><span></span><span></span></div>
     </div>
 
-    <!-- ── RESULT ── -->
+    <!-- RESULT -->
     <div class="result" id="result">
         <div class="verdict-header" id="verdictHeader">
             <div class="verdict-icon" id="verdictIcon"></div>
@@ -976,37 +543,22 @@
             <button class="speak-verdict-btn" id="speakBtn" onclick="toggleSpeak()">🔊 Read result aloud</button>
         </div>
         <div class="result-body">
-            <div class="result-section">
-                <div class="section-label"><span class="dot"></span> What we found</div>
-                <p id="summary"></p>
-            </div>
+            <div class="result-section"><div class="section-label"><span class="dot"></span> What we found</div><p id="summary"></p></div>
             <div class="divider"></div>
-            <div class="result-section">
-                <div class="section-label"><span class="dot"></span> Red flags</div>
-                <div class="flags-wrap" id="redFlags"></div>
-            </div>
+            <div class="result-section"><div class="section-label"><span class="dot"></span> Red flags</div><div class="flags-wrap" id="redFlags"></div></div>
             <div class="divider"></div>
-            <div class="result-section">
-                <div class="section-label"><span class="dot"></span> What you should do</div>
-                <div class="action-card" id="actionBox"><p id="action"></p></div>
-            </div>
+            <div class="result-section"><div class="section-label"><span class="dot"></span> What you should do</div><div class="action-card" id="actionBox"><p id="action"></p></div></div>
             <div class="divider"></div>
-            <div class="result-section">
-                <div class="section-label"><span class="dot"></span> Simple explanation</div>
-                <p id="explanation"></p>
-            </div>
+            <div class="result-section"><div class="section-label"><span class="dot"></span> Simple explanation</div><p id="explanation"></p></div>
             <button class="scan-again-btn" onclick="reset()">🔄 Check Another Message</button>
         </div>
     </div>
 
-    <!-- ── AI CHAT PANEL ── -->
+    <!-- CHAT PANEL -->
     <div class="chat-panel" id="chatPanel">
         <div class="chat-panel-header">
             <div class="chat-panel-avatar">🛡️</div>
-            <div class="chat-panel-info">
-                <h4>Ask PhishEye</h4>
-                <p>Ask anything about this scan result</p>
-            </div>
+            <div class="chat-panel-info"><h4>Ask Phish Eye</h4><p>Ask anything about this scan result</p></div>
             <div class="chat-online-dot"></div>
         </div>
         <div class="chat-messages" id="chatMessages"></div>
@@ -1018,40 +570,23 @@
             <span class="quick-pill" onclick="sendQuickChat('Is my data at risk?')">Is my data safe?</span>
         </div>
         <div class="chat-input-row">
-            <input class="chat-input" id="chatInput" type="text"
-                placeholder="Ask anything about this scan…"
-                onkeydown="if(event.key==='Enter') sendChatMessage()">
+            <input class="chat-input" id="chatInput" type="text" placeholder="Ask anything about this scan…" onkeydown="if(event.key==='Enter') sendChatMessage()">
             <button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()">↑</button>
         </div>
     </div>
-
 </div>
 
 <footer>
-    🛡️ PhishEye — Built for the <a href="#">Gemini Live Agent Challenge</a><br>
+    🛡️ Phish Eye — Built for the <a href="#">Gemini Live Agent Challenge</a><br>
     Protecting everyday people from scams with AI • Free forever
 </footer>
 
 <script>
-// ════════════════════════════════════════
-// STATE
-// ════════════════════════════════════════
-let selectedFile = null;
-let cameraStream = null;
-let currentScanResult = null;
-let currentSpeechText = '';
-let chatHistory = [];
-let liveAgentActive = false;
-let recognition = null;
-let isSpeaking = false;
-let agentConversationHistory = [];
-let isAgentThinking = false;
-let callMonitorActive = false;
-let callRecognition = null;
+let selectedFile = null, cameraStream = null, currentScanResult = null;
+let currentSpeechText = '', chatHistory = [], liveAgentActive = false;
+let recognition = null, isSpeaking = false, agentConversationHistory = [];
+let isAgentThinking = false, callMonitorActive = false, callRecognition = null;
 
-// ════════════════════════════════════════
-// TABS
-// ════════════════════════════════════════
 function switchTab(tab) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -1060,19 +595,12 @@ function switchTab(tab) {
     document.getElementById('tab-' + tab).classList.add('active');
 }
 
-// ════════════════════════════════════════
-// UPLOAD
-// ════════════════════════════════════════
 const uploadZone = document.getElementById('uploadZone');
 const fileInput = document.getElementById('fileInput');
-
 uploadZone.addEventListener('click', () => fileInput.click());
 uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
 uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
-uploadZone.addEventListener('drop', e => {
-    e.preventDefault(); uploadZone.classList.remove('dragover');
-    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
-});
+uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('dragover'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
 fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
 
 function handleFile(file) {
@@ -1099,9 +627,6 @@ function changeImage() {
     document.getElementById('chatPanel').style.display = 'none';
 }
 
-// ════════════════════════════════════════
-// CAMERA
-// ════════════════════════════════════════
 async function startCamera() {
     try {
         cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
@@ -1128,52 +653,32 @@ function capturePhoto() {
     const canvas = document.getElementById('captureCanvas');
     canvas.width = video.videoWidth; canvas.height = video.videoHeight;
     canvas.getContext('2d').drawImage(video, 0, 0);
-    canvas.toBlob(blob => {
-        selectedFile = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
-        stopCamera(); analyzeImage();
-    }, 'image/jpeg', 0.9);
+    canvas.toBlob(blob => { selectedFile = new File([blob], 'capture.jpg', { type: 'image/jpeg' }); stopCamera(); analyzeImage(); }, 'image/jpeg', 0.9);
 }
 
-// ════════════════════════════════════════
-// ANALYZE IMAGE
-// ════════════════════════════════════════
 async function analyzeImage() {
     if (!selectedFile) return;
     document.getElementById('analyzeBtn').style.display = 'none';
     document.getElementById('loading').style.display = 'block';
     document.getElementById('result').style.display = 'none';
     document.getElementById('chatPanel').style.display = 'none';
-
     const formData = new FormData();
     formData.append('image', selectedFile);
-
     try {
         const response = await fetch('/analyze', { method: 'POST', body: formData });
         const data = await response.json();
-        currentScanResult = data;
-        chatHistory = [];
-        showResult(data);
-        initChatPanel(data);
-    } catch(error) {
-        alert('Error analyzing. Please try again.');
-        reset();
-    }
+        currentScanResult = data; chatHistory = [];
+        showResult(data); initChatPanel(data);
+    } catch(error) { alert('Error analyzing. Please try again.'); reset(); }
 }
 
 function showResult(data) {
     document.getElementById('loading').style.display = 'none';
     document.getElementById('result').style.display = 'block';
-
     const level = data.threat_level || 'UNKNOWN';
-    const cfg = {
-        SAFE:       { emoji: '✅', tag: 'Looks Safe', title: 'No Scam Detected' },
-        SUSPICIOUS: { emoji: '⚠️', tag: 'Be Careful', title: 'Something Looks Off' },
-        SCAM:       { emoji: '🚨', tag: 'Warning!', title: 'This is a Scam!' },
-        UNKNOWN:    { emoji: '❓', tag: 'Unclear', title: "Couldn't Determine" }
-    };
+    const cfg = { SAFE: { emoji: '✅', tag: 'Looks Safe', title: 'No Scam Detected' }, SUSPICIOUS: { emoji: '⚠️', tag: 'Be Careful', title: 'Something Looks Off' }, SCAM: { emoji: '🚨', tag: 'Warning!', title: 'This is a Scam!' }, UNKNOWN: { emoji: '❓', tag: 'Unclear', title: "Couldn't Determine" } };
     const c = cfg[level] || cfg.UNKNOWN;
     const cl = level === 'UNKNOWN' ? 'SUSPICIOUS' : level;
-
     document.getElementById('verdictHeader').className = 'verdict-header ' + cl;
     document.getElementById('verdictIcon').className = 'verdict-icon ' + cl;
     document.getElementById('verdictIcon').textContent = c.emoji;
@@ -1186,7 +691,6 @@ function showResult(data) {
     document.getElementById('action').textContent = data.action || '';
     document.getElementById('explanation').textContent = data.explanation || '';
     document.getElementById('actionBox').className = 'action-card ' + cl;
-
     const flagsWrap = document.getElementById('redFlags');
     flagsWrap.innerHTML = '';
     if (data.red_flags && data.red_flags.length > 0) {
@@ -1194,42 +698,31 @@ function showResult(data) {
             if (flag && flag !== 'None detected') {
                 const chip = document.createElement('span');
                 chip.className = 'flag-chip';
-                chip.textContent = '⚑ ' + flag;
+                const parts = flag.split(':');
+                if (parts.length > 1) { chip.innerHTML = '⚑ <span class="flag-keyword">' + parts[0] + ':</span>' + parts.slice(1).join(':'); }
+                else { chip.innerHTML = '⚑ ' + flag; }
                 flagsWrap.appendChild(chip);
             }
         });
     }
-    if (flagsWrap.children.length === 0) {
-        flagsWrap.innerHTML = '<span style="color:var(--safe-text);font-size:13px;font-weight:600">✅ No red flags found</span>';
-    }
-
-    currentSpeechText = `${c.title}. ${data.summary || ''}. ${data.action || ''}`;
+    if (flagsWrap.children.length === 0) { flagsWrap.innerHTML = '<span style="color:var(--safe-text);font-size:13px;font-weight:600">✅ No red flags found</span>'; }
+    // Threat pulse
+    var o = document.getElementById('ov');
+    if (o) { o.style.background = level==='SCAM'?'rgba(192,32,15,0.22)':level==='SUSPICIOUS'?'rgba(255,170,46,0.15)':'rgba(46,207,176,0.12)'; o.style.opacity='1'; setTimeout(function(){ o.style.opacity='0'; }, 2000); }
+    currentSpeechText = c.title + '. ' + (data.summary||'') + '. ' + (data.action||'');
     document.getElementById('speakBtn').classList.remove('speaking');
     document.getElementById('speakBtn').textContent = '🔊 Read result aloud';
 }
 
 async function toggleSpeak() {
     const btn = document.getElementById('speakBtn');
-    if (isSpeaking) {
-        speechSynthesis.cancel();
-        isSpeaking = false;
-        btn.classList.remove('speaking');
-        btn.textContent = '🔊 Read result aloud';
-        return;
-    }
-    btn.classList.add('speaking');
-    btn.textContent = '⏹ Stop reading';
-    isSpeaking = true;
-    await speakText(currentSpeechText, () => {
-        isSpeaking = false;
-        btn.classList.remove('speaking');
-        btn.textContent = '🔊 Read result aloud';
-    });
+    if (isSpeaking) { speechSynthesis.cancel(); isSpeaking = false; btn.classList.remove('speaking'); btn.textContent = '🔊 Read result aloud'; return; }
+    btn.classList.add('speaking'); btn.textContent = '⏹ Stop reading'; isSpeaking = true;
+    await speakText(currentSpeechText, () => { isSpeaking = false; btn.classList.remove('speaking'); btn.textContent = '🔊 Read result aloud'; });
 }
 
 function reset() {
-    speechSynthesis.cancel();
-    selectedFile = null; fileInput.value = '';
+    speechSynthesis.cancel(); selectedFile = null; fileInput.value = '';
     currentScanResult = null; chatHistory = []; isSpeaking = false;
     document.getElementById('preview').style.display = 'none';
     document.getElementById('analyzeBtn').style.display = 'none';
@@ -1239,280 +732,125 @@ function reset() {
     document.getElementById('uploadZone').style.display = 'block';
 }
 
-// ════════════════════════════════════════
-// TTS — Google Cloud voice with fallback
-// ════════════════════════════════════════
 async function speakText(text, onEnd) {
     try {
-        const response = await fetch('/tts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text })
-        });
+        const response = await fetch('/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
         const data = await response.json();
-        if (data.audio) {
-            const audio = new Audio('data:audio/mp3;base64,' + data.audio);
-            audio.onended = onEnd || (() => {});
-            audio.onerror = () => fallbackSpeak(text, onEnd);
-            await audio.play();
-            return;
-        }
+        if (data.audio) { const audio = new Audio('data:audio/mp3;base64,' + data.audio); audio.onended = onEnd || (()=>{}); audio.onerror = () => fallbackSpeak(text, onEnd); await audio.play(); return; }
     } catch(e) {}
     fallbackSpeak(text, onEnd);
 }
 
 function fallbackSpeak(text, onEnd) {
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.05;
-    utterance.pitch = 1.1;
+    utterance.rate = 1.05; utterance.pitch = 1.1;
     const voices = speechSynthesis.getVoices();
-    const preferred = voices.find(v =>
-        v.name.includes('Samantha') ||
-        v.name.includes('Karen') ||
-        v.name.includes('Google US English') ||
-        (v.lang === 'en-US' && v.name.toLowerCase().includes('female'))
-    );
+    const preferred = voices.find(v => v.name.includes('Samantha') || v.name.includes('Karen') || v.name.includes('Google US English') || (v.lang === 'en-US' && v.name.toLowerCase().includes('female')));
     if (preferred) utterance.voice = preferred;
-    utterance.onend = onEnd || (() => {});
+    utterance.onend = onEnd || (()=>{});
     speechSynthesis.speak(utterance);
 }
 
-// ════════════════════════════════════════
-// AI CHAT PANEL
-// ════════════════════════════════════════
 function initChatPanel(scanData) {
     const panel = document.getElementById('chatPanel');
     const messages = document.getElementById('chatMessages');
-    messages.innerHTML = '';
-    chatHistory = [];
-
-    const opener = scanData.threat_level === 'SAFE'
-        ? "This looks safe! I didn't find anything suspicious. Do you have any questions about what I checked?"
-        : scanData.threat_level === 'SCAM'
-        ? "This is a scam — I can explain exactly why. Ask me anything: what the scammers are after, what to do next, or whether your data is at risk."
-        : "I found some suspicious signals worth discussing. Ask me anything about what I found or what you should do.";
-
-    appendChatMsg('agent', opener);
-    chatHistory.push({ role: 'assistant', content: opener });
-    panel.style.display = 'block';
-    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    messages.innerHTML = ''; chatHistory = [];
+    const opener = scanData.threat_level === 'SAFE' ? "This looks safe! I didn't find anything suspicious. Do you have any questions about what I checked?" : scanData.threat_level === 'SCAM' ? "This is a scam — I can explain exactly why. Ask me anything: what the scammers are after, what to do next, or whether your data is at risk." : "I found some suspicious signals worth discussing. Ask me anything about what I found or what you should do.";
+    appendChatMsg('agent', opener); chatHistory.push({ role: 'assistant', content: opener });
+    panel.style.display = 'block'; panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function appendChatMsg(role, text) {
     const feed = document.getElementById('chatMessages');
-    const div = document.createElement('div');
-    div.className = 'chat-msg ' + role;
-    const avatar = document.createElement('div');
-    avatar.className = 'chat-msg-avatar';
-    avatar.textContent = role === 'agent' ? '🛡️' : 'You';
-    const bubble = document.createElement('div');
-    bubble.className = 'chat-bubble';
-    bubble.textContent = text;
-    div.appendChild(avatar);
-    div.appendChild(bubble);
-    feed.appendChild(div);
-    feed.scrollTop = feed.scrollHeight;
+    const div = document.createElement('div'); div.className = 'chat-msg ' + role;
+    const avatar = document.createElement('div'); avatar.className = 'chat-msg-avatar'; avatar.textContent = role === 'agent' ? '🛡️' : 'You';
+    const bubble = document.createElement('div'); bubble.className = 'chat-bubble'; bubble.textContent = text;
+    div.appendChild(avatar); div.appendChild(bubble); feed.appendChild(div); feed.scrollTop = feed.scrollHeight;
 }
 
 function showChatTyping() {
     const feed = document.getElementById('chatMessages');
-    const div = document.createElement('div');
-    div.className = 'chat-msg agent'; div.id = 'chatTyping';
-    const avatar = document.createElement('div');
-    avatar.className = 'chat-msg-avatar'; avatar.textContent = '🛡️';
-    const typing = document.createElement('div');
-    typing.className = 'chat-typing';
-    typing.innerHTML = '<span></span><span></span><span></span>';
-    div.appendChild(avatar); div.appendChild(typing);
-    feed.appendChild(div);
-    feed.scrollTop = feed.scrollHeight;
+    const div = document.createElement('div'); div.className = 'chat-msg agent'; div.id = 'chatTyping';
+    const avatar = document.createElement('div'); avatar.className = 'chat-msg-avatar'; avatar.textContent = '🛡️';
+    const typing = document.createElement('div'); typing.className = 'chat-typing'; typing.innerHTML = '<span></span><span></span><span></span>';
+    div.appendChild(avatar); div.appendChild(typing); feed.appendChild(div); feed.scrollTop = feed.scrollHeight;
 }
 
-function removeChatTyping() {
-    const t = document.getElementById('chatTyping');
-    if (t) t.remove();
-}
-
-function sendQuickChat(text) {
-    document.getElementById('chatInput').value = text;
-    sendChatMessage();
-}
+function removeChatTyping() { const t = document.getElementById('chatTyping'); if (t) t.remove(); }
+function sendQuickChat(text) { document.getElementById('chatInput').value = text; sendChatMessage(); }
 
 async function sendChatMessage() {
-    const input = document.getElementById('chatInput');
-    const text = input.value.trim();
-    if (!text) return;
-
-    input.value = '';
-    document.getElementById('chatSendBtn').disabled = true;
-    document.getElementById('chatQuickPills').style.display = 'none';
-
-    appendChatMsg('user', text);
-    chatHistory.push({ role: 'user', content: text });
-    showChatTyping();
-
+    const input = document.getElementById('chatInput'); const text = input.value.trim(); if (!text) return;
+    input.value = ''; document.getElementById('chatSendBtn').disabled = true; document.getElementById('chatQuickPills').style.display = 'none';
+    appendChatMsg('user', text); chatHistory.push({ role: 'user', content: text }); showChatTyping();
     try {
-        const response = await fetch('/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: text, history: chatHistory, scan_context: currentScanResult })
-        });
-        const data = await response.json();
-        removeChatTyping();
-        appendChatMsg('agent', data.reply);
-        chatHistory.push({ role: 'assistant', content: data.reply });
-    } catch(e) {
-        removeChatTyping();
-        appendChatMsg('agent', "Sorry, I had trouble connecting. Please try again.");
-    }
-
+        const response = await fetch('/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: text, history: chatHistory, scan_context: currentScanResult }) });
+        const data = await response.json(); removeChatTyping(); appendChatMsg('agent', data.reply); chatHistory.push({ role: 'assistant', content: data.reply });
+    } catch(e) { removeChatTyping(); appendChatMsg('agent', "Sorry, I had trouble connecting. Please try again."); }
     document.getElementById('chatSendBtn').disabled = false;
 }
 
-// ════════════════════════════════════════
-// LIVE VOICE AGENT
-// ════════════════════════════════════════
 function setVoiceState(state) {
-    const indicator = document.getElementById('voiceIndicator');
-    const statusText = document.getElementById('voiceStatusText');
-    const micBtn = document.getElementById('liveMicBtn');
-    const orbit = document.getElementById('micOrbit');
-    const startText = document.getElementById('voiceStartText');
-
-    indicator.className = 'voice-status-indicator ' + state;
-    statusText.className = 'voice-status-text ' + state;
-
-    const labels = {
-        idle: 'PhishEye Live Agent • Ready',
-        listening: '🔴 Listening… speak now',
-        thinking: '💭 PhishEye is thinking…',
-        speaking: '🔊 PhishEye is speaking…'
-    };
-    statusText.textContent = labels[state];
-    micBtn.className = 'live-mic-btn ' + (state !== 'idle' ? state : '');
-    const icons = { idle: '🎙️', listening: '⏹', thinking: '⏳', speaking: '🔊' };
-    micBtn.textContent = icons[state];
-
-    if (state !== 'idle') {
-        orbit.classList.add('active');
-        startText.textContent = state === 'listening' ? 'Tap to stop' : 'Please wait…';
-    } else {
-        orbit.classList.remove('active');
-        startText.textContent = liveAgentActive ? 'Tap to speak again' : 'Tap to start talking';
-    }
+    const indicator = document.getElementById('voiceIndicator'), statusText = document.getElementById('voiceStatusText');
+    const micBtn = document.getElementById('liveMicBtn'), orbit = document.getElementById('micOrbit'), startText = document.getElementById('voiceStartText');
+    indicator.className = 'voice-status-indicator ' + state; statusText.className = 'voice-status-text ' + state;
+    const labels = { idle: 'Phish Eye Live Agent • Ready', listening: '🔴 Listening… speak now', thinking: '💭 Phish Eye is thinking…', speaking: '🔊 Phish Eye is speaking…' };
+    statusText.textContent = labels[state]; micBtn.className = 'live-mic-btn ' + (state !== 'idle' ? state : '');
+    const icons = { idle: '🎙️', listening: '⏹', thinking: '⏳', speaking: '🔊' }; micBtn.textContent = icons[state];
+    if (state !== 'idle') { orbit.classList.add('active'); startText.textContent = state === 'listening' ? 'Tap to stop' : 'Please wait…'; }
+    else { orbit.classList.remove('active'); startText.textContent = liveAgentActive ? 'Tap to speak again' : 'Tap to start talking'; }
 }
 
-function toggleLiveAgent() {
-    if (!liveAgentActive) startLiveAgent();
-    else if (recognition) { try { recognition.stop(); } catch(e) {} }
-    else startListeningCycle();
-}
+function toggleLiveAgent() { if (!liveAgentActive) startLiveAgent(); else if (recognition) { try { recognition.stop(); } catch(e) {} } else startListeningCycle(); }
 
 function startLiveAgent() {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        alert('Speech recognition requires Chrome browser.');
-        return;
-    }
-    liveAgentActive = true;
-    agentConversationHistory = [];
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) { alert('Speech recognition requires Chrome browser.'); return; }
+    liveAgentActive = true; agentConversationHistory = [];
     document.getElementById('voiceEmptyState').style.display = 'none';
     document.getElementById('voiceEndBtn').classList.add('visible');
     document.getElementById('voiceSuggestions').style.display = 'none';
-
-    const greeting = "Hi! I'm PhishEye. I'm here to help you stay safe from scams. Ask me anything — describe a suspicious message, a weird call, or anything that feels off.";
-    appendVoiceLine('agent', greeting);
-    agentConversationHistory.push({ role: 'assistant', content: greeting });
-    speakThenListen(greeting);
+    const greeting = "Hi! I'm Phish Eye. I'm here to help you stay safe from scams. Ask me anything — describe a suspicious message, a weird call, or anything that feels off.";
+    appendVoiceLine('agent', greeting); agentConversationHistory.push({ role: 'assistant', content: greeting }); speakThenListen(greeting);
 }
 
 function startListeningCycle() {
     if (isAgentThinking || isSpeaking) return;
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognition = new SR();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = 'en-US';
+    recognition = new SR(); recognition.continuous = false; recognition.interimResults = false; recognition.lang = 'en-US';
     setVoiceState('listening');
-
-    recognition.onresult = e => {
-        const transcript = e.results[0][0].transcript.trim();
-        if (transcript) {
-            appendVoiceLine('user', transcript);
-            agentConversationHistory.push({ role: 'user', content: transcript });
-            askLiveAgent(transcript);
-        }
-    };
-
-    recognition.onerror = e => {
-        if (e.error !== 'no-speech' && e.error !== 'aborted') console.warn('Speech error:', e.error);
-        if (liveAgentActive && !isAgentThinking && !isSpeaking) setTimeout(() => { if (liveAgentActive) startListeningCycle(); }, 800);
-        else setVoiceState('idle');
-    };
-
-    recognition.onend = () => {
-        if (!isAgentThinking && !isSpeaking && liveAgentActive) setVoiceState('idle');
-    };
-
+    recognition.onresult = e => { const transcript = e.results[0][0].transcript.trim(); if (transcript) { appendVoiceLine('user', transcript); agentConversationHistory.push({ role: 'user', content: transcript }); askLiveAgent(transcript); } };
+    recognition.onerror = e => { if (e.error !== 'no-speech' && e.error !== 'aborted') console.warn('Speech error:', e.error); if (liveAgentActive && !isAgentThinking && !isSpeaking) setTimeout(() => { if (liveAgentActive) startListeningCycle(); }, 800); else setVoiceState('idle'); };
+    recognition.onend = () => { if (!isAgentThinking && !isSpeaking && liveAgentActive) setVoiceState('idle'); };
     recognition.start();
 }
 
 async function askLiveAgent(question) {
-    isAgentThinking = true;
-    setVoiceState('thinking');
+    isAgentThinking = true; setVoiceState('thinking');
     try {
-        const response = await fetch('/voice-analyze', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ question, history: agentConversationHistory })
-        });
-        const data = await response.json();
-        const reply = data.answer;
-        agentConversationHistory.push({ role: 'assistant', content: reply });
-        appendVoiceLine('agent', reply);
-        isAgentThinking = false;
-        speakThenListen(reply);
-    } catch(e) {
-        isAgentThinking = false;
-        const fallback = "Sorry, I had trouble connecting. Could you repeat that?";
-        appendVoiceLine('agent', fallback);
-        speakThenListen(fallback);
-    }
+        const response = await fetch('/voice-analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question, history: agentConversationHistory }) });
+        const data = await response.json(); const reply = data.answer;
+        agentConversationHistory.push({ role: 'assistant', content: reply }); appendVoiceLine('agent', reply); isAgentThinking = false; speakThenListen(reply);
+    } catch(e) { isAgentThinking = false; const fallback = "Sorry, I had trouble connecting. Could you repeat that?"; appendVoiceLine('agent', fallback); speakThenListen(fallback); }
 }
 
 async function speakThenListen(text) {
-    isSpeaking = true;
-    setVoiceState('speaking');
-    speechSynthesis.cancel();
-
-    await speakText(text, () => {
-        isSpeaking = false;
-        if (liveAgentActive) setTimeout(() => startListeningCycle(), 400);
-        else setVoiceState('idle');
-    });
+    isSpeaking = true; setVoiceState('speaking'); speechSynthesis.cancel();
+    await speakText(text, () => { isSpeaking = false; if (liveAgentActive) setTimeout(() => startListeningCycle(), 400); else setVoiceState('idle'); });
 }
 
 function appendVoiceLine(role, text) {
     const feed = document.getElementById('voiceFeed');
-    const div = document.createElement('div');
-    div.className = 'voice-line ' + role;
-    const label = document.createElement('div');
-    label.className = 'voice-line-label';
-    label.textContent = role === 'agent' ? 'PhishEye' : 'You';
-    const textDiv = document.createElement('div');
-    textDiv.className = 'voice-line-text';
-    textDiv.textContent = text;
-    if (role === 'user') { div.appendChild(textDiv); div.appendChild(label); }
-    else { div.appendChild(label); div.appendChild(textDiv); }
-    feed.appendChild(div);
-    feed.scrollTop = feed.scrollHeight;
+    const div = document.createElement('div'); div.className = 'voice-line ' + role;
+    const label = document.createElement('div'); label.className = 'voice-line-label'; label.textContent = role === 'agent' ? 'Phish Eye' : 'You';
+    const textDiv = document.createElement('div'); textDiv.className = 'voice-line-text'; textDiv.textContent = text;
+    if (role === 'user') { div.appendChild(textDiv); div.appendChild(label); } else { div.appendChild(label); div.appendChild(textDiv); }
+    feed.appendChild(div); feed.scrollTop = feed.scrollHeight;
 }
 
 function endLiveSession() {
     liveAgentActive = false; isAgentThinking = false; isSpeaking = false;
     if (recognition) { try { recognition.abort(); } catch(e) {} recognition = null; }
-    speechSynthesis.cancel();
-    agentConversationHistory = [];
-    setVoiceState('idle');
+    speechSynthesis.cancel(); agentConversationHistory = []; setVoiceState('idle');
     document.getElementById('voiceEndBtn').classList.remove('visible');
     document.getElementById('voiceSuggestions').style.display = 'flex';
     appendVoiceLine('agent', "Session ended. Stay safe out there! 🛡️");
@@ -1520,18 +858,9 @@ function endLiveSession() {
 
 function injectVoicePrompt(text) {
     if (!liveAgentActive) startLiveAgent();
-    setTimeout(() => {
-        if (liveAgentActive && !isAgentThinking && !isSpeaking) {
-            appendVoiceLine('user', text);
-            agentConversationHistory.push({ role: 'user', content: text });
-            askLiveAgent(text);
-        }
-    }, 2500);
+    setTimeout(() => { if (liveAgentActive && !isAgentThinking && !isSpeaking) { appendVoiceLine('user', text); agentConversationHistory.push({ role: 'user', content: text }); askLiveAgent(text); } }, 2500);
 }
 
-// ════════════════════════════════════════
-// LIVE CALL GUARDIAN
-// ════════════════════════════════════════
 function startCallMonitor() {
     callMonitorActive = true;
     document.getElementById('startCallBtn').style.display = 'none';
@@ -1539,27 +868,12 @@ function startCallMonitor() {
     document.getElementById('callStatus').className = 'live-call-status monitoring';
     document.getElementById('callStatusText').textContent = 'Monitoring active';
     document.getElementById('callNoAlerts').style.display = 'none';
-
-    addCallAlert('safe', '🛡️', 'Monitoring started. Type what the caller says or speak — PhishEye is watching.');
-
-    // Start live speech recognition for call monitoring
+    addCallAlert('safe', '🛡️', 'Monitoring started. Type what the caller says — Phish Eye is watching.');
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-        callRecognition = new SR();
-        callRecognition.continuous = true;
-        callRecognition.interimResults = false;
-        callRecognition.lang = 'en-US';
-
-        callRecognition.onresult = e => {
-            const transcript = e.results[e.results.length - 1][0].transcript.trim();
-            if (transcript && callMonitorActive) {
-                document.getElementById('callTranscript').value += ' ' + transcript;
-                analyzeCallTranscript();
-            }
-        };
-
-        callRecognition.onerror = () => {};
-        callRecognition.start();
+        callRecognition = new SR(); callRecognition.continuous = true; callRecognition.interimResults = false; callRecognition.lang = 'en-US';
+        callRecognition.onresult = e => { const transcript = e.results[e.results.length - 1][0].transcript.trim(); if (transcript && callMonitorActive) { document.getElementById('callTranscript').value += ' ' + transcript; } };
+        callRecognition.onerror = () => {}; callRecognition.start();
     }
 }
 
@@ -1575,175 +889,106 @@ function stopCallMonitor() {
 
 async function analyzeCallTranscript() {
     const transcript = document.getElementById('callTranscript').value.trim();
-    if (!transcript) {
-        alert('Please type what the caller is saying first.');
-        return;
-    }
-
+    if (!transcript) { alert('Please type what the caller is saying first.'); return; }
     addCallAlert('warning', '⏳', 'Analyzing call transcript…');
-
     try {
-        const response = await fetch('/voice-analyze', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                question: `Analyze this phone call transcript for scam patterns, urgency tactics, impersonation, or AI voice cloning signals. Be very direct and brief: "${transcript}"`,
-                history: []
-            })
-        });
-        const data = await response.json();
-        const answer = data.answer;
-
-        // Determine alert type based on response
-        const isScam = answer.toLowerCase().includes('scam') || answer.toLowerCase().includes('fraud') || answer.toLowerCase().includes('suspicious');
-        const alertType = isScam ? 'danger' : 'safe';
-        const alertEmoji = isScam ? '🚨' : '✅';
-
-        // Remove loading alert
-        const feed = document.getElementById('callAlertsFeed');
-        const alerts = feed.querySelectorAll('.call-alert-item');
+        const response = await fetch('/voice-analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: `Analyze this phone call transcript for scam patterns, urgency tactics, impersonation, or AI voice cloning signals. Be very direct and brief: "${transcript}"`, history: [] }) });
+        const data = await response.json(); const answer = data.answer;
+        const isScam = answer.toLowerCase().includes('scam') || answer.toLowerCase().includes('fraud') || answer.toLowerCase().includes('suspicious') || answer.toLowerCase().includes('hang up');
+        const alertType = isScam ? 'danger' : 'safe'; const alertEmoji = isScam ? '🚨' : '✅';
+        const feed = document.getElementById('callAlertsFeed'); const alerts = feed.querySelectorAll('.call-alert-item');
         if (alerts.length > 0) alerts[alerts.length - 1].remove();
-
         addCallAlert(alertType, alertEmoji, answer);
-
-        // Speak the alert
-        if (isScam) {
-            speakText("Warning! " + answer, null);
-        }
-    } catch(e) {
-        addCallAlert('warning', '⚠️', 'Error analyzing. Please try again.');
-    }
+        if (isScam) { var o = document.getElementById('ov'); if(o){o.style.background='rgba(192,32,15,0.22)';o.style.opacity='1';setTimeout(function(){o.style.opacity='0';},2000);} speakText("Warning! " + answer, null); }
+    } catch(e) { addCallAlert('warning', '⚠️', 'Error analyzing. Please try again.'); }
 }
 
 function addCallAlert(type, emoji, text) {
     const feed = document.getElementById('callAlertsFeed');
-    const noAlerts = document.getElementById('callNoAlerts');
-    if (noAlerts) noAlerts.style.display = 'none';
-
-    const div = document.createElement('div');
-    div.className = 'call-alert-item ' + type;
-
-    const emojiDiv = document.createElement('div');
-    emojiDiv.className = 'call-alert-emoji';
-    emojiDiv.textContent = emoji;
-
-    const textDiv = document.createElement('div');
-    textDiv.className = 'call-alert-text';
-    textDiv.textContent = text;
-
-    div.appendChild(emojiDiv);
-    div.appendChild(textDiv);
-
-    // Keep label at top
+    const noAlerts = document.getElementById('callNoAlerts'); if (noAlerts) noAlerts.style.display = 'none';
+    const div = document.createElement('div'); div.className = 'call-alert-item ' + type;
+    const emojiDiv = document.createElement('div'); emojiDiv.className = 'call-alert-emoji'; emojiDiv.textContent = emoji;
+    const textDiv = document.createElement('div'); textDiv.className = 'call-alert-text'; textDiv.textContent = text;
+    div.appendChild(emojiDiv); div.appendChild(textDiv);
     const label = feed.querySelector('.call-alerts-label');
-    if (label) feed.insertBefore(div, label.nextSibling);
-    else feed.appendChild(div);
-
+    if (label) feed.insertBefore(div, label.nextSibling); else feed.appendChild(div);
     feed.scrollTop = feed.scrollHeight;
 }
 </script>
+
 <script>
-    const canvas = document.getElementById('bgCanvas');
-    const ctx = canvas.getContext('2d');
-    function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
-    resize();
-    window.addEventListener('resize', resize);
-    const GRID=28;
-    const continents=[
-      {x:0.06,y:0.12,w:0.18,h:0.28},{x:0.17,y:0.42,w:0.10,h:0.26},
-      {x:0.43,y:0.10,w:0.08,h:0.14},{x:0.44,y:0.25,w:0.10,h:0.28},
-      {x:0.52,y:0.08,w:0.26,h:0.30},{x:0.72,y:0.50,w:0.12,h:0.14},
-      {x:0.20,y:0.05,w:0.07,h:0.09}
-    ];
-    function inContinent(gx,gy){
-      const fx=gx/canvas.width, fy=gy/canvas.height;
-      return continents.some(c=>fx>=c.x&&fx<=c.x+c.w&&fy>=c.y&&fy<=c.y+c.h);
-    }
-    class Fish{
-      constructor(){ this.reset(true); }
-      reset(init){
-        this.y=init?Math.random()*canvas.height:(Math.random()*canvas.height*0.8+canvas.height*0.1);
-        this.x=init?Math.random()*canvas.width:-60;
-        this.speed=0.4+Math.random()*0.8;
-        this.size=10+Math.random()*14;
-        this.alpha=0.45+Math.random()*0.3;
-        this.color=Math.random()>0.5?'rgba(255,107,74,':'rgba(74,150,255,';
-        this.wobble=Math.random()*Math.PI*2;
-        this.tailPhase=Math.random()*Math.PI*2;
-      }
-      update(){ this.x+=this.speed; this.wobble+=0.025; this.tailPhase+=0.08; if(this.x>canvas.width+80) this.reset(false); }
-      draw(){
-        const s=this.size, cy=this.y+Math.sin(this.wobble)*3, cx=this.x;
-        const tw=Math.sin(this.tailPhase)*s*0.5;
-        ctx.save(); ctx.globalAlpha=this.alpha;
-        ctx.strokeStyle=this.color+'0.8)'; ctx.fillStyle=this.color+'0.12)'; ctx.lineWidth=1.2;
-        ctx.beginPath(); ctx.ellipse(cx,cy,s,s*0.45,0,0,Math.PI*2); ctx.fill(); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(cx-s,cy); ctx.lineTo(cx-s*1.6,cy-s*0.5+tw);
-        ctx.lineTo(cx-s*1.3,cy); ctx.lineTo(cx-s*1.6,cy+s*0.5+tw); ctx.closePath(); ctx.fill(); ctx.stroke();
-        ctx.beginPath(); ctx.arc(cx+s*0.4,cy,s*0.15,0,Math.PI*2);
-        ctx.fillStyle=this.color+'0.9)'; ctx.fill(); ctx.restore();
-      }
-    }
-    const fish=Array.from({length:18},()=>new Fish());
-    let tick=0;
-    function draw(){
-      const w=canvas.width, h=canvas.height;
-      ctx.clearRect(0,0,w,h);
-      ctx.fillStyle='#fdfaf2'; ctx.fillRect(0,0,w,h);
-      ctx.lineWidth=0.4;
-      for(let x=0;x<w;x+=GRID){ ctx.beginPath(); ctx.strokeStyle='rgba(74,150,255,0.12)'; ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
-      for(let y=0;y<h;y+=GRID){ ctx.beginPath(); ctx.strokeStyle='rgba(74,150,255,0.12)'; ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
-      for(let x=0;x<w;x+=GRID){
-        for(let y=0;y<h;y+=GRID){
-          const dist=Math.sqrt((x-w*0.5)**2+(y-h*0.5)**2);
-          const pulse=Math.sin(tick*0.015-dist*0.018)*0.5+0.5;
-          ctx.beginPath();
-          if(inContinent(x,y)){
-            ctx.arc(x,y,2+pulse*1.2,0,Math.PI*2);
-            ctx.fillStyle=`rgba(100,160,210,${0.2+pulse*0.15})`;
-          } else {
-            ctx.arc(x,y,1,0,Math.PI*2);
-            ctx.fillStyle='rgba(74,150,255,0.15)';
-          }
-          ctx.fill();
-        }
-      }
-      fish.forEach(f=>{ f.update(); f.draw(); });
-      tick++;
-      requestAnimationFrame(draw);
-    }
-    draw();
+// ANIMATED BACKGROUND
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resize(); window.addEventListener('resize', resize);
+const GRID=28;
+const continents=[{x:0.06,y:0.12,w:0.18,h:0.28},{x:0.17,y:0.42,w:0.10,h:0.26},{x:0.43,y:0.10,w:0.08,h:0.14},{x:0.44,y:0.25,w:0.10,h:0.28},{x:0.52,y:0.08,w:0.26,h:0.30},{x:0.72,y:0.50,w:0.12,h:0.14},{x:0.20,y:0.05,w:0.07,h:0.09}];
+function inContinent(gx,gy){ const fx=gx/canvas.width, fy=gy/canvas.height; return continents.some(c=>fx>=c.x&&fx<=c.x+c.w&&fy>=c.y&&fy<=c.y+c.h); }
 
-    const TIPS = [
-        "💡 The IRS will never call you demanding gift card payments!",
-        "💡 Banks never ask for your full password over the phone!",
-        "💡 If it creates urgency — slow down, it's probably a scam!",
-        "💡 Verify suspicious emails by calling the company directly",
-        "💡 Legitimate companies never ask you to pay via gift cards",
-        "💡 'You've won a prize' emails are almost always scams",
-        "💡 Never click links in texts from unknown numbers",
-        "💡 AI can now clone a family member's voice from just 3 seconds of audio!",
-        "💡 Government agencies contact you by mail, not phone calls",
-        "💡 If someone asks you to keep it secret — it's a scam!",
-        "💡 Check email sender addresses carefully — scammers use lookalikes!",
-        "💡 Never give remote access to your computer to unsolicited callers",
-        "💡 Romance scams cost Americans over $1 billion every year",
-        "💡 Phishing links often mimic real URLs with tiny spelling changes",
-        "💡 When in doubt, use Phish Eye to check it instantly😉"
-    ];
-    let tipIndex = 0;
-    const tipEl = document.getElementById('tipText');
-    setInterval(() => {
-        const tip = document.getElementById('headerTip');
-        tip.style.opacity = '0';
-        setTimeout(() => {
-            tipIndex = (tipIndex + 1) % TIPS.length;
-            tipEl.textContent = TIPS[tipIndex];
-            tip.style.opacity = '1';
-        }, 500);
-    }, 5000);
+class Fish {
+    constructor() { this.reset(true); }
+    reset(init) {
+        // Random direction: left-to-right or right-to-left
+        this.dir = Math.random() > 0.5 ? 1 : -1;
+        this.x = init ? Math.random() * canvas.width : (this.dir === 1 ? -80 : canvas.width + 80);
+        this.y = init ? Math.random() * canvas.height : Math.random() * canvas.height;
+        this.speed = (0.3 + Math.random() * 0.9) * this.dir;
+        this.size = 8 + Math.random() * 16;
+        this.alpha = 0.5 + Math.random() * 0.4;
+        const r = Math.random();
+        this.color = r < 0.4 ? 'rgba(255,107,74,' : r < 0.7 ? 'rgba(255,170,80,' : 'rgba(46,207,176,';
+        this.wobble = Math.random() * Math.PI * 2;
+        this.tailPhase = Math.random() * Math.PI * 2;
+    }
+    update() {
+        this.x += this.speed;
+        this.wobble += 0.025;
+        this.tailPhase += 0.08;
+        if (this.dir === 1 && this.x > canvas.width + 80) this.reset(false);
+        if (this.dir === -1 && this.x < -80) this.reset(false);
+    }
+    draw() {
+        const s = this.size, cy = this.y + Math.sin(this.wobble) * 3, cx = this.x;
+        const tw = Math.sin(this.tailPhase) * s * 0.5;
+        const flip = this.dir === -1 ? -1 : 1;
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.translate(cx, cy);
+        ctx.scale(flip, 1);
+        ctx.translate(-cx, -cy);
+        ctx.strokeStyle = this.color + '0.8)';
+        ctx.fillStyle = this.color + '0.12)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.ellipse(cx, cy, s, s * 0.45, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx - s, cy); ctx.lineTo(cx - s * 1.6, cy - s * 0.5 + tw);
+        ctx.lineTo(cx - s * 1.3, cy); ctx.lineTo(cx - s * 1.6, cy + s * 0.5 + tw);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx + s * 0.4, cy, s * 0.15, 0, Math.PI * 2);
+        ctx.fillStyle = this.color + '0.9)'; ctx.fill();
+        ctx.restore();
+    }
+}
 
+const fish = Array.from({length: 50}, () => new Fish());
+let tick = 0;
+function draw(){
+  const w=canvas.width, h=canvas.height;
+  ctx.clearRect(0,0,w,h); ctx.fillStyle='#F5F3FF'; ctx.fillRect(0,0,w,h);
+  ctx.lineWidth=0.4;
+  for(let x=0;x<w;x+=GRID){ ctx.beginPath(); ctx.strokeStyle='rgba(130,100,220,0.08)'; ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for(let y=0;y<h;y+=GRID){ ctx.beginPath(); ctx.strokeStyle='rgba(130,100,220,0.08)'; ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+  for(let x=0;x<w;x+=GRID){ for(let y=0;y<h;y+=GRID){ const dist=Math.sqrt((x-w*0.5)**2+(y-h*0.5)**2); const pulse=Math.sin(tick*0.015-dist*0.018)*0.5+0.5; ctx.beginPath(); if(inContinent(x,y)){ ctx.arc(x,y,2+pulse*1.2,0,Math.PI*2); ctx.fillStyle=`rgba(130,100,220,${0.15+pulse*0.12})`; } else { ctx.arc(x,y,1,0,Math.PI*2); ctx.fillStyle='rgba(130,100,220,0.12)'; } ctx.fill(); } }
+  fish.forEach(f=>{ f.update(); f.draw(); });
+  tick++; requestAnimationFrame(draw);
+}
+draw();
 
-    </script>
+// ROTATING TIPS
+const TIPS = ["💡 The IRS will never call you demanding gift card payments!","💡 Banks never ask for your full password over the phone!","💡 If it creates urgency — slow down, it's probably a scam!","💡 Verify suspicious emails by calling the company directly","💡 Legitimate companies never ask you to pay via gift cards","💡 'You've won a prize' emails are almost always scams","💡 Never click links in texts from unknown numbers","💡 AI can now clone a family member's voice from just 3 seconds of audio!","💡 Government agencies contact you by mail, not phone calls","💡 If someone asks you to keep it secret — it's a scam!","💡 Check email sender addresses carefully — scammers use lookalikes!","💡 Never give remote access to your computer to unsolicited callers","💡 AI voice cloning scams increased 300% in 2023-2024","💡 Phishing links often mimic real URLs with tiny spelling changes","💡 When in doubt, use Phish Eye to check it instantly 😉"];
+let tipIndex = 0;
+const tipEl = document.getElementById('tipText');
+setInterval(() => { const tip = document.getElementById('headerTip'); tip.style.opacity='0'; setTimeout(() => { tipIndex=(tipIndex+1)%TIPS.length; tipEl.textContent=TIPS[tipIndex]; tip.style.opacity='1'; }, 500); }, 5000);
+</script>
 </body>
 </html>

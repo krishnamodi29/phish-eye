@@ -528,8 +528,8 @@
     <!-- LOADING -->
     <div class="loading" id="loading">
         <div class="loader-eye"><div class="loader-eye-outer"></div><div class="loader-eye-inner">👁️</div></div>
-        <h4>Analyzing your image…</h4>
-        <p>Checking for fake urgency, suspicious links, impersonation & more</p>
+        <h4>Phish Eye is scanning…</h4>
+        <p id="loadingMsg">Checking for fake urgency and suspicious links…</p>
         <div class="loading-dots"><span></span><span></span><span></span></div>
     </div>
 
@@ -593,6 +593,25 @@ function switchTab(tab) {
     const tabs = ['upload', 'camera', 'voice', 'call'];
     document.querySelectorAll('.tab')[tabs.indexOf(tab)].classList.add('active');
     document.getElementById('tab-' + tab).classList.add('active');
+}
+const loadingMsgs = [
+    "Checking for fake urgency and suspicious links…",
+    "Scanning for impersonation and spoofed domains…",
+    "Analyzing sender addresses and red flags…",
+    "Cross-checking with verified FTC & FBI scam data…",
+    "Almost there — finalizing your result…"
+];
+let loadingInterval = null;
+function startLoadingMessages() {
+    let i = 0;
+    loadingInterval = setInterval(() => {
+        i = (i + 1) % loadingMsgs.length;
+        const el = document.getElementById('loadingMsg');
+        if (el) el.textContent = loadingMsgs[i];
+    }, 5000);
+}
+function stopLoadingMessages() {
+    if (loadingInterval) { clearInterval(loadingInterval); loadingInterval = null; }
 }
 
 const uploadZone = document.getElementById('uploadZone');
@@ -660,6 +679,7 @@ async function analyzeImage() {
     if (!selectedFile) return;
     document.getElementById('analyzeBtn').style.display = 'none';
     document.getElementById('loading').style.display = 'block';
+    startLoadingMessages();
     document.getElementById('result').style.display = 'none';
     document.getElementById('chatPanel').style.display = 'none';
     const formData = new FormData();
@@ -674,6 +694,7 @@ async function analyzeImage() {
 
 function showResult(data) {
     document.getElementById('loading').style.display = 'none';
+    stopLoadingMessages();
     document.getElementById('result').style.display = 'block';
     const level = data.threat_level || 'UNKNOWN';
     const cfg = { SAFE: { emoji: '✅', tag: 'Looks Safe', title: 'No Scam Detected' }, SUSPICIOUS: { emoji: '⚠️', tag: 'Be Careful', title: 'Something Looks Off' }, SCAM: { emoji: '🚨', tag: 'Warning!', title: 'This is a Scam!' }, UNKNOWN: { emoji: '❓', tag: 'Unclear', title: "Couldn't Determine" } };
@@ -712,6 +733,7 @@ function showResult(data) {
     currentSpeechText = c.title + '. ' + (data.summary||'') + '. ' + (data.action||'');
     document.getElementById('speakBtn').classList.remove('speaking');
     document.getElementById('speakBtn').textContent = '🔊 Read result aloud';
+    setTimeout(() => document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 }
 
 async function toggleSpeak() {
